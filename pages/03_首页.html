@@ -237,9 +237,24 @@
 
   /* Result */
   .res-h {
-    display: flex; align-items: baseline; justify-content: space-between;
+    display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 14px;
+    gap: 12px;
   }
+  .res-h > div { flex: 1; min-width: 0; }
+  .edit-link {
+    flex-shrink: 0;
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 6px 12px;
+    font-size: 12px; font-weight: 500;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: none; border-radius: var(--r-pill);
+    cursor: pointer;
+    transition: all var(--d-1) var(--ease);
+  }
+  .edit-link:hover { background: var(--accent); color: white; }
+  .edit-link svg { width: 12px; height: 12px; }
   .res-h h2 { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; color: var(--fg); }
   .res-h .small { font-size: 12px; color: var(--fg-mute); }
 
@@ -527,15 +542,17 @@
       <!-- C 本期结果 -->
       <div class="state" id="lover-C">
         <div class="res-h">
-          <h2>本周伴侣</h2>
-          <span class="small" id="lover-c-meta">1 位 · 下周四 20:00 更新</span>
+          <div>
+            <h2>本周伴侣</h2>
+            <span class="small" id="lover-c-meta">1 位 · 下周四 20:00 更新</span>
+          </div>
+          <button class="edit-link" id="lover-edit-2" title="调整资料 · 下次生效">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <span>调资料</span>
+          </button>
         </div>
         <div id="card-list-lover"></div>
         <p style="text-align:center;font-size:11px;color:var(--fg-faint);margin-top:14px;">深度匹配 · 一周一次 · 慢即是快</p>
-        <div style="text-align:center;margin-top:22px;padding-top:16px;border-top:1px solid var(--border);">
-          <p style="font-size:12px;color:var(--fg-mute);margin-bottom:10px;">不太合适？调一下，下周四生效</p>
-          <button class="cycle-btn-ghost" id="lover-edit-2">调整资料 · 下次生效</button>
-        </div>
       </div>
     </div>
 
