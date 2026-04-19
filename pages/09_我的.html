@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-accent="indigo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Match AI · 我的</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .page { display: flex; flex-direction: column; }
+
+  .brandbar {
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 22px 10px;
+  }
+  .brand-name {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--fg);
+  }
+  .brand-name .dot { color: var(--accent); }
+  .icon-btn {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--fg-mute); cursor: pointer;
+    transition: all var(--d-1) var(--ease);
+  }
+  .icon-btn:hover { background: var(--bg-elev); color: var(--accent); }
+  .icon-btn svg { width: 18px; height: 18px; }
+
+  .scroll {
+    flex: 1; min-height: 0;
+    overflow-y: auto;
+    padding: 6px 22px 22px;
+    scrollbar-width: none;
+  }
+  .scroll::-webkit-scrollbar { display: none; }
+
+  /* === Hero: 分身光球 + 完成度环 === */
+  .hero {
+    text-align: center;
+    padding: 8px 0 24px;
+  }
+  .orb-wrap {
+    position: relative;
+    width: 140px; height: 140px;
+    margin: 0 auto 16px;
+  }
+  .ring {
+    position: absolute; inset: 0;
+    transform: rotate(-90deg);
+  }
+  .ring circle {
+    fill: none;
+    stroke-width: 4;
+    cx: 70; cy: 70; r: 64;
+  }
+  .ring .bg { stroke: var(--border); }
+  .ring .fg { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset 1.5s var(--ease); }
+  .orb {
+    position: absolute;
+    inset: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--accent-hover), var(--accent) 60%, #2a2a55 100%);
+    box-shadow: inset 0 4px 12px rgba(255,255,255,0.25), 0 8px 32px var(--accent-soft);
+    animation: orbBreathe 3.5s var(--ease) infinite;
+  }
+  @keyframes orbBreathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+  }
+
+  .agent-name {
+    font-size: 22px; font-weight: 700; letter-spacing: -0.02em;
+    color: var(--fg);
+  }
+  .agent-meta {
+    margin-top: 4px;
+    font-size: 12px; color: var(--fg-mute);
+    display: flex; align-items: center; gap: 6px;
+    justify-content: center;
+  }
+  .lv-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 10px; border-radius: var(--r-pill);
+    background: var(--accent-soft); color: var(--accent);
+    font-size: 11px; font-weight: 600;
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+  }
+  .completion-text {
+    margin-top: 8px;
+    font-size: 12px; color: var(--fg-mute);
+  }
+  .completion-text b { color: var(--fg); font-weight: 700; }
+
+  /* === 远期赚钱钩子 === */
+  .future-hook {
+    background: linear-gradient(135deg, var(--accent-soft), transparent);
+    border: 1px dashed var(--accent);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    cursor: pointer;
+    transition: all var(--d-1) var(--ease);
+  }
+  .future-hook:hover { background: var(--accent-soft); }
+  .future-hook-title {
+    font-size: 12px; font-weight: 600; color: var(--accent);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .future-hook-title .arr { margin-left: auto; transition: transform var(--d-1) var(--ease); }
+  .future-hook.open .future-hook-title .arr { transform: rotate(180deg); }
+  .future-hook-body {
+    margin-top: 10px;
+    font-size: 12px; color: var(--fg-mute); line-height: 1.6;
+    display: none;
+  }
+  .future-hook.open .future-hook-body { display: block; animation: fadeIn 240ms var(--ease); }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(-2px);} to { opacity:1; transform:translateY(0);} }
+
+  /* === Section === */
+  .section-h {
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--fg-faint);
+    margin: 22px 0 10px;
+  }
+
+  .list {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 14px;
+    cursor: pointer; user-select: none;
+    border-bottom: 1px solid var(--border);
+    transition: background var(--d-1) var(--ease);
+  }
+  .item:last-child { border-bottom: none; }
+  .item:hover { background: var(--accent-soft); }
+  .item-emoji { font-size: 18px; line-height: 1; flex-shrink: 0; }
+  .item-icon {
+    width: 24px; height: 24px; flex-shrink: 0;
+    color: var(--fg-mute);
+  }
+  .item-icon svg { width: 100%; height: 100%; }
+  .item-name { flex: 1; font-size: 14px; color: var(--fg); font-weight: 500; }
+  .item-meta { font-size: 12px; color: var(--fg-mute); }
+  .item-meta.ok { color: var(--accent); font-weight: 500; }
+  .item-meta.todo { color: #F59E0B; font-weight: 500; }
+  .item-arr {
+    width: 16px; height: 16px;
+    color: var(--fg-faint); flex-shrink: 0;
+  }
+  .item-arr svg { width: 100%; height: 100%; }
+
+  /* Bottom tab */
+  .bottom-tab {
+    flex-shrink: 0;
+    display: flex; align-items: stretch;
+    background: var(--bg-elev); border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .btab {
+    flex: 1; padding: 10px 0 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    color: var(--fg-faint); cursor: pointer;
+    transition: color var(--d-1) var(--ease);
+  }
+  .btab:hover, .btab.active { color: var(--accent); }
+  .btab svg { width: 22px; height: 22px; stroke-width: 2; }
+  .btab span { font-size: 10px; font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="statusbar">
+    <span>9:41</span>
+    <span class="icons">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6c5-3 15-3 20 0"/><path d="M5 10c4-2 10-2 14 0"/><path d="M8 14c2-1 6-1 8 0"/><circle cx="12" cy="18" r="1.2" fill="currentColor"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="18" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg>
+    </span>
+  </div>
+
+  <div class="brandbar">
+    <span class="brand-name">我的</span>
+    <span class="icon-btn" title="设置">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </span>
+  </div>
+
+  <div class="scroll">
+    <!-- Hero: 分身 -->
+    <div class="hero">
+      <div class="orb-wrap">
+        <svg class="ring" viewBox="0 0 140 140">
+          <circle class="bg" cx="70" cy="70" r="64"/>
+          <circle class="fg" cx="70" cy="70" r="64" stroke-dasharray="402" stroke-dashoffset="113"/>
+        </svg>
+        <div class="orb"></div>
+      </div>
+      <div class="agent-name">阿杰的分身</div>
+      <div class="agent-meta">
+        <span class="lv-pill">Lv.4</span>
+        <span>·</span>
+        <span>Aurora</span>
+      </div>
+      <div class="completion-text">已了解你 <b>72%</b> · 还有 <b>3 项</b> 资料可补</div>
+    </div>
+
+    <!-- 远期赚钱钩子 -->
+    <div class="future-hook" id="hook">
+      <div class="future-hook-title">
+        <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        <span>分身正在成长 · 未来能代你做更多</span>
+        <svg class="arr" style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="future-hook-body">
+        分身越完整，未来越能：<br>
+        · 代你接收他人的付费匹配请求<br>
+        · 帮你筛选、回复、约见<br>
+        · 你将获得平台分成
+      </div>
+    </div>
+
+    <!-- 场景资料 -->
+    <div class="section-h">场景资料</div>
+    <div class="list" id="scene-list"></div>
+
+    <!-- 基础信息 -->
+    <div class="section-h">基础信息</div>
+    <div class="list">
+      <div class="item">
+        <div class="item-emoji">👤</div>
+        <div class="item-name">性别</div>
+        <div class="item-meta" id="my-gender">男</div>
+        <svg class="item-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="item">
+        <div class="item-emoji">📍</div>
+        <div class="item-name">所在城市</div>
+        <div class="item-meta" id="my-city">杭州</div>
+        <svg class="item-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="item">
+        <div class="item-emoji">💬</div>
+        <div class="item-name">微信号</div>
+        <div class="item-meta" id="my-wx">已填</div>
+        <svg class="item-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+
+    <!-- 设置 -->
+    <div class="section-h">更多</div>
+    <div class="list">
+      <div class="item">
+        <div class="item-emoji">🔒</div>
+        <div class="item-name">隐私设置</div>
+        <svg class="item-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="item">
+        <div class="item-emoji">⚠️</div>
+        <div class="item-name">举报记录</div>
+        <svg class="item-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="item">
+        <div class="item-emoji">ℹ️</div>
+        <div class="item-name">关于 Match AI</div>
+        <div class="item-meta">v7</div>
+        <svg class="item-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+
+    <p style="text-align:center;font-size:11px;color:var(--fg-faint);margin-top:24px;">
+      Match AI · 找到合拍的人
+    </p>
+  </div>
+
+  <div class="bottom-tab">
+    <div class="btab" data-nav="03_首页.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      <span>首页</span>
+    </div>
+    <div class="btab" data-nav="08_校园圈子.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg>
+      <span>校园</span>
+    </div>
+    <div class="btab active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+      <span>我的</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 远期钩子折叠
+  document.getElementById('hook').addEventListener('click', () => {
+    document.getElementById('hook').classList.toggle('open');
+  });
+
+  // 场景列表（5 主场景 + 校园圈子）
+  const SCENES = [
+    { k:'buddy',  emoji:'🤝', name:'合拍搭子',  desc:'兴趣 + 6 类 48 标签' },
+    { k:'lover',  emoji:'💕', name:'合拍伴侣',  desc:'照片 + 性格 + 6 道偏好' },
+    { k:'job',    emoji:'💼', name:'实习求职',  desc:'学校 + 专业 + 行业' },
+    { k:'skill',  emoji:'🔁', name:'技能交换',  desc:'你会的 + 你想学的' },
+    { k:'barter', emoji:'🔄', name:'易物',      desc:'闲置 + 想换' },
+    { k:'school', emoji:'🎓', name:'校园圈子',  desc:'7 个细分场景' },
+  ];
+
+  const sceneList = document.getElementById('scene-list');
+  sceneList.innerHTML = SCENES.map(s => {
+    const filled = s.k === 'school'
+      ? !!localStorage.getItem('matchai_school')
+      : !!localStorage.getItem('matchai_' + s.k + '_activated');
+    const meta = filled
+      ? `<div class="item-meta ok">已填</div>`
+      : `<div class="item-meta todo">未填</div>`;
+    return `
+      <div class="item" data-k="${s.k}">
+        <div class="item-emoji">${s.emoji}</div>
+        <div>
+          <div class="item-name">${s.name}</div>
+          <div class="item-meta" style="font-size:11px;margin-top:1px;">${s.desc}</div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+          ${meta}
+          <svg class="item-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+    `;
+  }).join('');
+  sceneList.querySelectorAll('.item').forEach(el => {
+    el.addEventListener('click', () => {
+      const k = el.dataset.k;
+      if (k === 'school') goPage('08_校园圈子.html');
+      else goPage('03_首页.html');  // 首页 tab 切到对应场景需要前端处理
+    });
+  });
+
+  // 显示基础信息
+  document.getElementById('my-city').textContent = localStorage.getItem('matchai_city') || '杭州';
+  const wx = localStorage.getItem('matchai_wechat');
+  document.getElementById('my-wx').textContent = wx ? '已填' : '未填';
+  if (!wx) document.getElementById('my-wx').className = 'item-meta todo';
+
+  // 底部 nav
+  document.querySelectorAll('.btab[data-nav]').forEach(b => {
+    b.addEventListener('click', () => goPage(b.dataset.nav));
+  });
+
+  function goPage(target) {
+    if (window.parent !== window) window.parent.postMessage({ type:'nav', page:target }, '*');
+    else location.href = target;
+  }
+
+  window.addEventListener('message', e => {
+    if (e.data?.type === 'theme') document.documentElement.dataset.theme = e.data.value;
+    if (e.data?.type === 'accent') document.documentElement.dataset.accent = e.data.value;
+  });
+</script>
+</body>
+</html>
