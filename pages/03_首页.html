@@ -82,6 +82,10 @@
   .state.show { display: block; animation: fadeIn 240ms var(--ease); }
   @keyframes fadeIn { from { opacity:0; transform:translateY(4px);} to { opacity:1; transform:translateY(0);} }
 
+  /* Pane visibility */
+  .pane { display: none; }
+  .pane.show { display: block; }
+
   /* Form */
   .form-h h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--fg); }
   .form-h p { margin-top: 4px; font-size: 13px; color: var(--fg-mute); }
@@ -94,8 +98,10 @@
     border-radius: 12px;
     font-family: inherit; font-size: 15px; color: var(--fg);
     transition: border-color var(--d-1) var(--ease);
+    box-sizing: border-box;
   }
   .wx-input:focus { outline: none; border-color: var(--accent); }
+  textarea.wx-input { resize: none; min-height: 72px; line-height: 1.5; }
   .wx-hint { margin-top: 6px; font-size: 11px; color: var(--fg-faint); }
 
   .interest-block { margin-top: 22px; }
@@ -120,6 +126,36 @@
   }
   .tag:hover { border-color: var(--border-strong); }
   .tag.on { background: var(--accent); color: white; border-color: var(--accent); }
+
+  /* Radio (single-select) row */
+  .radio-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .radio {
+    padding: 7px 14px; border-radius: var(--r-pill);
+    background: var(--bg-elev); border: 1.2px solid var(--border);
+    font-size: 13px; color: var(--fg); font-weight: 500;
+    cursor: pointer; user-select: none;
+    transition: all var(--d-1) var(--ease); line-height: 1.2;
+  }
+  .radio:hover { border-color: var(--border-strong); }
+  .radio.on {
+    background: var(--accent-soft); color: var(--accent); border-color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* Photo upload placeholder */
+  .photo-up {
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 6px;
+    width: 100%; padding: 26px 0;
+    border: 1.5px dashed var(--accent);
+    border-radius: 14px;
+    background: var(--accent-soft);
+    color: var(--accent); font-size: 12px; font-weight: 600;
+    cursor: pointer; user-select: none;
+    transition: all var(--d-1) var(--ease);
+  }
+  .photo-up:hover { background: var(--accent); color: white; }
+  .photo-up svg { width: 22px; height: 22px; }
 
   .form-footer {
     position: sticky; bottom: 0;
@@ -189,12 +225,6 @@
     border-radius: var(--r-pill); font-weight: 500;
   }
 
-  /* Locked panes */
-  .empty {
-    text-align: center; padding: 80px 20px; color: var(--fg-faint);
-  }
-  .empty .e-emoji { font-size: 36px; margin-bottom: 12px; opacity: 0.5; }
-
   /* State B: 匹配中 */
   .matching {
     text-align: center;
@@ -240,7 +270,7 @@
     100% { width: 90%; transform: translateX(110%); }
   }
 
-  /* Demo state cycler (top-right floating) */
+  /* Demo state cycler */
   .demo-toggle {
     position: absolute;
     top: 50px; right: 12px;
@@ -253,8 +283,6 @@
     transition: opacity var(--d-1) var(--ease);
   }
   .demo-toggle:hover { opacity: 1; }
-  .empty .e-title { font-size: 14px; font-weight: 600; color: var(--fg-mute); margin-bottom: 4px; }
-  .empty .e-sub { font-size: 12px; color: var(--fg-faint); line-height: 1.5; }
 
   .bottom-tab {
     flex-shrink: 0;
@@ -297,39 +325,40 @@
       <span class="tchip-name">搭子</span>
       <span class="tchip-status" id="st-buddy">没参加</span>
     </div>
-    <div class="tchip lock" data-s="lover">
+    <div class="tchip" data-s="lover">
       <span class="tchip-emoji">💕</span>
       <span class="tchip-name">伴侣</span>
-      <span class="tchip-status">暂未开放</span>
+      <span class="tchip-status" id="st-lover">没参加</span>
     </div>
-    <div class="tchip lock" data-s="job">
+    <div class="tchip" data-s="job">
       <span class="tchip-emoji">💼</span>
       <span class="tchip-name">求职</span>
-      <span class="tchip-status">暂未开放</span>
+      <span class="tchip-status" id="st-job">没参加</span>
     </div>
-    <div class="tchip lock" data-s="skill">
+    <div class="tchip" data-s="skill">
       <span class="tchip-emoji">🔁</span>
       <span class="tchip-name">技能</span>
-      <span class="tchip-status">暂未开放</span>
+      <span class="tchip-status" id="st-skill">没参加</span>
     </div>
-    <div class="tchip lock" data-s="barter">
+    <div class="tchip" data-s="barter">
       <span class="tchip-emoji">🔄</span>
       <span class="tchip-name">易物</span>
-      <span class="tchip-status">暂未开放</span>
+      <span class="tchip-status" id="st-barter">没参加</span>
     </div>
   </div>
 
   <div class="scroll" id="scroll">
 
-    <div id="pane-buddy">
+    <!-- ===== BUDDY ===== -->
+    <div id="pane-buddy" class="pane show">
       <div class="state" id="buddy-A">
         <div class="form-h">
           <h2>填一下你的兴趣</h2>
           <p>选 3-5 个标签，匹配跟你合拍的搭子</p>
         </div>
-        <div class="wx-block" id="wx-block">
+        <div class="wx-block" id="wx-block-buddy">
           <div class="wx-label">微信号</div>
-          <input class="wx-input" id="wx-input" type="text" placeholder="你的微信号" autocomplete="off"/>
+          <input class="wx-input" id="wx-input-buddy" type="text" placeholder="你的微信号" autocomplete="off"/>
           <div class="wx-hint">字母开头，6-20 位 · 一次填写所有场景通用</div>
         </div>
         <div class="interest-block">
@@ -343,60 +372,238 @@
           <button class="btn-primary" id="submit" disabled>开始匹配</button>
         </div>
       </div>
-
-      <!-- State B: 匹配中 -->
       <div class="state" id="buddy-B">
         <div class="matching">
-          <div class="matching-orb">
-            <div class="orb-dot"></div>
-            <div class="orb-dot"></div>
-            <div class="orb-dot"></div>
-          </div>
+          <div class="matching-orb"><div class="orb-dot"></div><div class="orb-dot"></div><div class="orb-dot"></div></div>
           <h2 class="matching-title">分身正在为你寻找…</h2>
           <p class="matching-sub">扫描了 38 个潜在合拍的人<br>预计 15 秒内出结果</p>
           <div class="matching-bar"><div class="matching-bar-fill"></div></div>
         </div>
       </div>
-
-      <!-- State C: 有结果 -->
       <div class="state" id="buddy-C">
         <div class="res-h">
           <h2>今日匹配</h2>
           <span class="small">3 个 · 明天 0 点更新</span>
         </div>
-        <div id="card-list"></div>
-        <p style="text-align:center;font-size:11px;color:var(--fg-faint);margin-top:14px;">
-          明天还有 1 次新匹配 · 晚安
-        </p>
+        <div id="card-list-buddy"></div>
+        <p style="text-align:center;font-size:11px;color:var(--fg-faint);margin-top:14px;">明天还有 1 次新匹配 · 晚安</p>
       </div>
     </div>
 
-    <div id="pane-lover" class="state">
-      <div class="empty">
-        <div class="e-emoji">💕</div>
-        <div class="e-title">合拍伴侣</div>
-        <div class="e-sub">每周四晚 8 点公布<br>暂未开放，敬请期待</div>
+    <!-- ===== LOVER ===== -->
+    <div id="pane-lover" class="pane">
+      <div class="state" id="lover-A">
+        <div class="form-h">
+          <h2>合拍伴侣</h2>
+          <p>每周四 20:00 公布一位 · 1×1 深度匹配</p>
+        </div>
+        <div class="wx-block">
+          <div class="wx-label">你的照片</div>
+          <div class="photo-up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <span>添加照片</span>
+          </div>
+        </div>
+        <div class="interest-block">
+          <div class="progress-row">
+            <span>性格标签 <span class="count" id="count-lover">0</span> / 至少 3</span>
+            <span id="hint-lover">还差 3 个</span>
+          </div>
+          <div class="tags" id="tags-lover"></div>
+        </div>
+        <div class="wx-block">
+          <div class="wx-label">期望的 TA</div>
+          <textarea class="wx-input" id="lover-wish" maxlength="60" placeholder="喜欢什么样的伴侣？"></textarea>
+          <div class="wx-hint">最多 60 字</div>
+        </div>
+        <div class="wx-block lover-wx">
+          <div class="wx-label">微信号</div>
+          <input class="wx-input" id="wx-input-lover" type="text" placeholder="你的微信号" autocomplete="off"/>
+          <div class="wx-hint">字母开头，6-20 位</div>
+        </div>
+        <div class="form-footer">
+          <button class="btn-primary" id="submit-lover" disabled>开始匹配</button>
+        </div>
+      </div>
+      <div class="state" id="lover-B">
+        <div class="matching">
+          <div class="matching-orb"><div class="orb-dot"></div><div class="orb-dot"></div><div class="orb-dot"></div></div>
+          <h2 class="matching-title">分身正在为你寻找伴侣…</h2>
+          <p class="matching-sub">本周从 1240 位用户中筛选<br>周四 20:00 准时公布</p>
+          <div class="matching-bar"><div class="matching-bar-fill"></div></div>
+        </div>
+      </div>
+      <div class="state" id="lover-C">
+        <div class="res-h">
+          <h2>本周伴侣</h2>
+          <span class="small">1 位 · 下周四 20:00 更新</span>
+        </div>
+        <div id="card-list-lover"></div>
+        <p style="text-align:center;font-size:11px;color:var(--fg-faint);margin-top:14px;">深度匹配 · 一周一次 · 慢即是快</p>
       </div>
     </div>
-    <div id="pane-job" class="state">
-      <div class="empty">
-        <div class="e-emoji">💼</div>
-        <div class="e-title">实习求职</div>
-        <div class="e-sub">每周匹配同行/校友内推<br>暂未开放</div>
+
+    <!-- ===== JOB ===== -->
+    <div id="pane-job" class="pane">
+      <div class="state" id="job-A">
+        <div class="form-h">
+          <h2>实习求职</h2>
+          <p>每周 1 次，匹配同行 / 校友 / 内推</p>
+        </div>
+        <div class="wx-block">
+          <div class="wx-label">学校</div>
+          <input class="wx-input" id="job-school" type="text" placeholder="例：浙江大学" autocomplete="off"/>
+        </div>
+        <div class="wx-block">
+          <div class="wx-label">专业</div>
+          <input class="wx-input" id="job-major" type="text" placeholder="例：计算机科学" autocomplete="off"/>
+        </div>
+        <div class="wx-block">
+          <div class="wx-label">年级</div>
+          <div class="radio-row" id="job-grade"></div>
+        </div>
+        <div class="wx-block">
+          <div class="wx-label">求职状态</div>
+          <div class="radio-row" id="job-status"></div>
+        </div>
+        <div class="interest-block">
+          <div class="progress-row">
+            <span>目标行业 <span class="count" id="count-job">0</span> / 至少 1</span>
+            <span id="hint-job">还差 1 个</span>
+          </div>
+          <div class="tags" id="tags-job"></div>
+        </div>
+        <div class="wx-block job-wx">
+          <div class="wx-label">微信号</div>
+          <input class="wx-input" id="wx-input-job" type="text" placeholder="你的微信号" autocomplete="off"/>
+          <div class="wx-hint">字母开头，6-20 位</div>
+        </div>
+        <div class="form-footer">
+          <button class="btn-primary" id="submit-job" disabled>开始匹配</button>
+        </div>
+      </div>
+      <div class="state" id="job-B">
+        <div class="matching">
+          <div class="matching-orb"><div class="orb-dot"></div><div class="orb-dot"></div><div class="orb-dot"></div></div>
+          <h2 class="matching-title">分身正在搜寻同行 / 校友…</h2>
+          <p class="matching-sub">基于学校 / 专业 / 行业三维匹配<br>预计 10 秒内出结果</p>
+          <div class="matching-bar"><div class="matching-bar-fill"></div></div>
+        </div>
+      </div>
+      <div class="state" id="job-C">
+        <div class="res-h">
+          <h2>本周匹配</h2>
+          <span class="small">3 位 · 下周一 9 点更新</span>
+        </div>
+        <div id="card-list-job"></div>
       </div>
     </div>
-    <div id="pane-skill" class="state">
-      <div class="empty">
-        <div class="e-emoji">🔁</div>
-        <div class="e-title">技能交换</div>
-        <div class="e-sub">你会的 ↔ 你想学的<br>暂未开放</div>
+
+    <!-- ===== SKILL ===== -->
+    <div id="pane-skill" class="pane">
+      <div class="state" id="skill-A">
+        <div class="form-h">
+          <h2>技能交换</h2>
+          <p>你会的 ↔ 你想学的 · 每 3 天 1 次</p>
+        </div>
+        <div class="interest-block">
+          <div class="progress-row">
+            <span>我会的技能 <span class="count" id="count-skill-have">0</span> / 1-5 个</span>
+            <span id="hint-skill-have">至少选 1 个</span>
+          </div>
+          <div id="cats-skill-have"></div>
+        </div>
+        <div class="interest-block">
+          <div class="progress-row">
+            <span>我想学的 <span class="count" id="count-skill-want">0</span> / 1-5 个</span>
+            <span id="hint-skill-want">至少选 1 个</span>
+          </div>
+          <div id="cats-skill-want"></div>
+        </div>
+        <div class="wx-block">
+          <div class="wx-label">简短介绍（可选）</div>
+          <textarea class="wx-input" id="skill-intro" maxlength="30" placeholder="一句话介绍自己 · 30 字"></textarea>
+        </div>
+        <div class="wx-block skill-wx">
+          <div class="wx-label">微信号</div>
+          <input class="wx-input" id="wx-input-skill" type="text" placeholder="你的微信号" autocomplete="off"/>
+          <div class="wx-hint">字母开头，6-20 位</div>
+        </div>
+        <div class="form-footer">
+          <button class="btn-primary" id="submit-skill" disabled>开始匹配</button>
+        </div>
+      </div>
+      <div class="state" id="skill-B">
+        <div class="matching">
+          <div class="matching-orb"><div class="orb-dot"></div><div class="orb-dot"></div><div class="orb-dot"></div></div>
+          <h2 class="matching-title">分身正在配对技能…</h2>
+          <p class="matching-sub">寻找你会的 ↔ TA 想学的双向匹配<br>预计 12 秒内出结果</p>
+          <div class="matching-bar"><div class="matching-bar-fill"></div></div>
+        </div>
+      </div>
+      <div class="state" id="skill-C">
+        <div class="res-h">
+          <h2>本轮匹配</h2>
+          <span class="small">3 位 · 3 天后更新</span>
+        </div>
+        <div id="card-list-skill"></div>
       </div>
     </div>
-    <div id="pane-barter" class="state">
-      <div class="empty">
-        <div class="e-emoji">🔄</div>
-        <div class="e-title">易物</div>
-        <div class="e-sub">闲置物品盲盒交换<br>暂未开放</div>
+
+    <!-- ===== BARTER ===== -->
+    <div id="pane-barter" class="pane">
+      <div class="state" id="barter-A">
+        <div class="form-h">
+          <h2>易物</h2>
+          <p>闲置物品盲盒交换 · 每周 1 次 · 1×1</p>
+        </div>
+        <div class="wx-block">
+          <div class="wx-label">闲置品类</div>
+          <div class="radio-row" id="barter-cat"></div>
+        </div>
+        <div class="wx-block">
+          <div class="wx-label">闲置介绍</div>
+          <textarea class="wx-input" id="barter-desc" maxlength="30" placeholder="说明闲置物品 · 30 字"></textarea>
+        </div>
+        <div class="wx-block">
+          <div class="wx-label">想换什么</div>
+          <input class="wx-input" id="barter-want" type="text" placeholder="例：泡泡玛特盲盒"/>
+        </div>
+        <div class="wx-block">
+          <div class="wx-label">对换的人的期望（可选）</div>
+          <textarea class="wx-input" id="barter-wish" maxlength="30" placeholder="希望 TA 是什么样的人 · 30 字"></textarea>
+        </div>
+        <div class="wx-block">
+          <div class="wx-label">闲置照片</div>
+          <div class="photo-up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <span>添加照片</span>
+          </div>
+        </div>
+        <div class="wx-block barter-wx">
+          <div class="wx-label">微信号</div>
+          <input class="wx-input" id="wx-input-barter" type="text" placeholder="你的微信号" autocomplete="off"/>
+          <div class="wx-hint">字母开头，6-20 位</div>
+        </div>
+        <div class="form-footer">
+          <button class="btn-primary" id="submit-barter" disabled>开始匹配</button>
+        </div>
+      </div>
+      <div class="state" id="barter-B">
+        <div class="matching">
+          <div class="matching-orb"><div class="orb-dot"></div><div class="orb-dot"></div><div class="orb-dot"></div></div>
+          <h2 class="matching-title">分身正在配对易物…</h2>
+          <p class="matching-sub">从本周 320 位易物者中筛选<br>预计 10 秒内出结果</p>
+          <div class="matching-bar"><div class="matching-bar-fill"></div></div>
+        </div>
+      </div>
+      <div class="state" id="barter-C">
+        <div class="res-h">
+          <h2>本周易物</h2>
+          <span class="small">1 位 · 下周一更新</span>
+        </div>
+        <div id="card-list-barter"></div>
+        <p style="text-align:center;font-size:11px;color:var(--fg-faint);margin-top:14px;">微信沟通后线下面交 · 注意安全</p>
       </div>
     </div>
 
@@ -419,59 +626,64 @@
 </div>
 
 <script>
-  const panes = ['buddy','lover','job','skill','barter'];
+  const SCENES = ['buddy','lover','job','skill','barter'];
+  const COUNT_LABEL = {
+    buddy: '3 个新',
+    lover: '1 位新',
+    job: '3 位新',
+    skill: '3 位新',
+    barter: '1 位新',
+  };
+  const WX_RE = /^[A-Za-z][A-Za-z0-9_-]{5,19}$/;
 
+  let currentScene = 'buddy';
+
+  // ---------- TAB SWITCH ----------
   document.querySelectorAll('.tchip').forEach(chip => {
     chip.addEventListener('click', () => {
       document.querySelectorAll('.tchip').forEach(c => c.classList.remove('on'));
       chip.classList.add('on');
       const s = chip.dataset.s;
-      panes.forEach(p => {
+      currentScene = s;
+      SCENES.forEach(p => {
         const pane = document.getElementById('pane-' + p);
-        if (!pane) return;
-        if (p === s) {
-          if (s === 'buddy') showBuddyState();
-          else pane.classList.add('show');
-        } else {
-          if (p === 'buddy') {
-            document.getElementById('buddy-A').classList.remove('show');
-            document.getElementById('buddy-C').classList.remove('show');
-          } else {
-            pane.classList.remove('show');
-          }
-        }
+        pane.classList.toggle('show', p === s);
       });
+      showSceneState(s);
       document.getElementById('scroll').scrollTop = 0;
     });
   });
 
-  function showBuddyState() {
-    // demo mode: ?demo=A|B|C  覆盖 localStorage
+  // ---------- STATE RENDERER (generic) ----------
+  function showSceneState(scene) {
     const url = new URL(location.href);
-    const demo = url.searchParams.get('demo');
+    const demo = url.searchParams.get('demo_' + scene) || (scene === currentScene ? url.searchParams.get('demo') : null);
     let state;
     if (demo === 'A' || demo === 'B' || demo === 'C') state = demo;
-    else if (sessionStorage.getItem('matchai_buddy_demo')) state = sessionStorage.getItem('matchai_buddy_demo');
-    else state = localStorage.getItem('matchai_buddy_activated') ? 'C' : 'A';
+    else if (sessionStorage.getItem('matchai_' + scene + '_demo')) state = sessionStorage.getItem('matchai_' + scene + '_demo');
+    else state = localStorage.getItem('matchai_' + scene + '_activated') ? 'C' : 'A';
 
-    document.getElementById('buddy-A').classList.toggle('show', state === 'A');
-    document.getElementById('buddy-B').classList.toggle('show', state === 'B');
-    document.getElementById('buddy-C').classList.toggle('show', state === 'C');
+    ['A','B','C'].forEach(k => {
+      const el = document.getElementById(scene + '-' + k);
+      if (el) el.classList.toggle('show', state === k);
+    });
 
-    // 更新 tab 状态文字
-    const st = document.getElementById('st-buddy');
-    const chip = document.querySelector('.tchip[data-s="buddy"]');
-    chip.classList.remove('has-new');
-    if (state === 'A') st.textContent = '没参加';
-    if (state === 'B') st.textContent = '匹配中';
-    if (state === 'C') {
-      st.textContent = '3 个新';
-      chip.classList.add('has-new');
+    const st = document.getElementById('st-' + scene);
+    const chip = document.querySelector('.tchip[data-s="' + scene + '"]');
+    if (chip) chip.classList.remove('has-new');
+    if (st) {
+      if (state === 'A') st.textContent = '没参加';
+      if (state === 'B') st.textContent = '匹配中';
+      if (state === 'C') {
+        st.textContent = COUNT_LABEL[scene] || '有结果';
+        chip.classList.add('has-new');
+      }
     }
 
-    if (state === 'C') renderCards();
+    if (state === 'C') renderResults(scene);
   }
 
+  // ---------- BUDDY: form (existing) ----------
   const categories = [
     { emoji: '🏃', name: '运动', tags: ['徒步','跑步','健身','瑜伽','骑行','球类','游泳','攀岩'] },
     { emoji: '🎬', name: '娱乐', tags: ['电影','音乐','演唱会','livehouse','脱口秀','桌游','剧本杀','KTV'] },
@@ -480,82 +692,222 @@
     { emoji: '💼', name: '职业', tags: ['创业','互联网','金融','教育','医疗','设计师','产品','律师'] },
     { emoji: '✨', name: '社交', tags: ['游戏','社团','志愿者','派对','沙龙','市集','飞盘','滑板'] },
   ];
-
   document.getElementById('cats').innerHTML = categories.map(c => `
     <div class="cat">
       <div class="cat-head"><span class="cat-emoji">${c.emoji}</span><span>${c.name}</span></div>
       <div class="tags">${c.tags.map(t => `<div class="tag" data-t="${t}">${t}</div>`).join('')}</div>
-    </div>
-  `).join('');
+    </div>`).join('');
 
+  const buddySelected = new Set();
+  const buddyWxInput = document.getElementById('wx-input-buddy');
+  const buddySubmit = document.getElementById('submit');
   const existingWx = localStorage.getItem('matchai_wechat');
-  if (existingWx) document.getElementById('wx-block').style.display = 'none';
+  if (existingWx) document.getElementById('wx-block-buddy').style.display = 'none';
 
-  const wxInput = document.getElementById('wx-input');
-  const submit = document.getElementById('submit');
-  const count = document.getElementById('count');
-  const hint = document.getElementById('hint');
-  const selected = new Set();
-  const WX_RE = /^[A-Za-z][A-Za-z0-9_-]{5,19}$/;
-
-  document.querySelectorAll('.tag').forEach(t => {
+  document.querySelectorAll('#cats .tag').forEach(t => {
     t.addEventListener('click', () => {
       const v = t.dataset.t;
-      if (selected.has(v)) { selected.delete(v); t.classList.remove('on'); }
-      else { if (selected.size >= 5) return; selected.add(v); t.classList.add('on'); }
-      updateState();
+      if (buddySelected.has(v)) { buddySelected.delete(v); t.classList.remove('on'); }
+      else { if (buddySelected.size >= 5) return; buddySelected.add(v); t.classList.add('on'); }
+      const n = buddySelected.size;
+      document.getElementById('count').textContent = n;
+      document.getElementById('hint').textContent = n < 3 ? `还差 ${3-n} 个` : (n>=5 ? '已满' : `还可以选 ${5-n} 个`);
+      buddySubmit.disabled = !(n>=3 && (existingWx || WX_RE.test(buddyWxInput.value.trim())));
     });
   });
-  wxInput?.addEventListener('input', updateState);
-
-  function wxValid() {
-    if (existingWx) return true;
-    return WX_RE.test(wxInput.value.trim());
-  }
-  function updateState() {
-    const n = selected.size;
-    count.textContent = n;
-    hint.textContent = n < 3 ? `还差 ${3-n} 个` : (n>=5 ? '已满' : `还可以选 ${5-n} 个`);
-    submit.disabled = !(n>=3 && wxValid());
-  }
-
-  submit.addEventListener('click', () => {
-    if (submit.disabled) return;
-    if (!existingWx) localStorage.setItem('matchai_wechat', wxInput.value.trim());
-    localStorage.setItem('matchai_buddy_tags', JSON.stringify([...selected]));
-    // 进入匹配中状态
-    sessionStorage.setItem('matchai_buddy_demo', 'B');
-    showBuddyState();
-    document.getElementById('scroll').scrollTop = 0;
-    // 3 秒后进入结果
-    setTimeout(() => {
-      localStorage.setItem('matchai_buddy_activated', '1');
-      sessionStorage.removeItem('matchai_buddy_demo');
-      showBuddyState();
-    }, 3000);
+  buddyWxInput.addEventListener('input', () => {
+    const n = buddySelected.size;
+    buddySubmit.disabled = !(n>=3 && (existingWx || WX_RE.test(buddyWxInput.value.trim())));
+  });
+  buddySubmit.addEventListener('click', () => {
+    if (buddySubmit.disabled) return;
+    if (!existingWx) localStorage.setItem('matchai_wechat', buddyWxInput.value.trim());
+    triggerMatch('buddy');
   });
 
-  const matches = [
-    { id:'linxi', initial:'林', name:'林夕',  pct:92, gender:'女', age:23, city:'杭州', hot:true,  tags:['徒步','电影','咖啡'], quote:'你们都喜欢徒步、电影和咖啡。林夕周末常去万象城那家独立咖啡，可以约一起。' },
-    { id:'miya',  initial:'M',  name:'Miya',  pct:76, gender:'女', age:25, city:'杭州', hot:false, tags:['摄影','读书','旅行'], quote:'Miya 也喜欢摄影和读书，可以聊聊最近在追的剧。' },
-    { id:'kayla', initial:'K',  name:'Kayla', pct:71, gender:'女', age:24, city:'杭州', hot:false, tags:['脱口秀','音乐节'],   quote:'Kayla 是脱口秀爱好者，常去 livehouse。' }
-  ];
+  // ---------- LOVER: form ----------
+  const loverTags = ['内向','外向','温柔','独立','幽默','理性','感性','上进','文艺','实在','浪漫','顾家'];
+  document.getElementById('tags-lover').innerHTML = loverTags.map(t => `<div class="tag" data-t="${t}">${t}</div>`).join('');
+  const loverSelected = new Set();
+  const loverSubmit = document.getElementById('submit-lover');
+  const loverWxInput = document.getElementById('wx-input-lover');
+  if (existingWx) document.querySelector('.lover-wx').style.display = 'none';
+  function loverCheck() {
+    const n = loverSelected.size;
+    document.getElementById('count-lover').textContent = n;
+    document.getElementById('hint-lover').textContent = n < 3 ? `还差 ${3-n} 个` : (n>=5 ? '已满' : `还可以选 ${5-n} 个`);
+    const wxOk = existingWx || WX_RE.test(loverWxInput.value.trim());
+    loverSubmit.disabled = !(n>=3 && n<=5 && wxOk);
+  }
+  document.querySelectorAll('#tags-lover .tag').forEach(t => {
+    t.addEventListener('click', () => {
+      const v = t.dataset.t;
+      if (loverSelected.has(v)) { loverSelected.delete(v); t.classList.remove('on'); }
+      else { if (loverSelected.size >= 5) return; loverSelected.add(v); t.classList.add('on'); }
+      loverCheck();
+    });
+  });
+  loverWxInput.addEventListener('input', loverCheck);
+  loverSubmit.addEventListener('click', () => { if (!loverSubmit.disabled) { if (!existingWx) localStorage.setItem('matchai_wechat', loverWxInput.value.trim()); triggerMatch('lover'); } });
 
-  function renderCards() {
-    document.getElementById('card-list').innerHTML = matches.map(m => `
+  // ---------- JOB: form ----------
+  const grades = ['大一','大二','大三','大四','研一','研二','研三','已毕业'];
+  const statuses = ['社招','校招','暑期实习','日常实习'];
+  const industries = ['互联网','金融','教育','医疗','咨询','设计','媒体','法律'];
+  document.getElementById('job-grade').innerHTML = grades.map(g => `<div class="radio" data-v="${g}">${g}</div>`).join('');
+  document.getElementById('job-status').innerHTML = statuses.map(s => `<div class="radio" data-v="${s}">${s}</div>`).join('');
+  document.getElementById('tags-job').innerHTML = industries.map(t => `<div class="tag" data-t="${t}">${t}</div>`).join('');
+  const jobState = { grade:null, status:null, industries:new Set() };
+  const jobSubmit = document.getElementById('submit-job');
+  const jobWxInput = document.getElementById('wx-input-job');
+  if (existingWx) document.querySelector('.job-wx').style.display = 'none';
+  function jobCheck() {
+    const n = jobState.industries.size;
+    document.getElementById('count-job').textContent = n;
+    document.getElementById('hint-job').textContent = n < 1 ? '还差 1 个' : (n>=4 ? '建议聚焦' : `可继续添加`);
+    const school = document.getElementById('job-school').value.trim();
+    const major = document.getElementById('job-major').value.trim();
+    const wxOk = existingWx || WX_RE.test(jobWxInput.value.trim());
+    jobSubmit.disabled = !(school && major && jobState.grade && jobState.status && n>=1 && wxOk);
+  }
+  document.querySelectorAll('#job-grade .radio').forEach(r => r.addEventListener('click', () => {
+    document.querySelectorAll('#job-grade .radio').forEach(x => x.classList.remove('on'));
+    r.classList.add('on'); jobState.grade = r.dataset.v; jobCheck();
+  }));
+  document.querySelectorAll('#job-status .radio').forEach(r => r.addEventListener('click', () => {
+    document.querySelectorAll('#job-status .radio').forEach(x => x.classList.remove('on'));
+    r.classList.add('on'); jobState.status = r.dataset.v; jobCheck();
+  }));
+  document.querySelectorAll('#tags-job .tag').forEach(t => t.addEventListener('click', () => {
+    const v = t.dataset.t;
+    if (jobState.industries.has(v)) { jobState.industries.delete(v); t.classList.remove('on'); }
+    else { jobState.industries.add(v); t.classList.add('on'); }
+    jobCheck();
+  }));
+  ['job-school','job-major'].forEach(id => document.getElementById(id).addEventListener('input', jobCheck));
+  jobWxInput.addEventListener('input', jobCheck);
+  jobSubmit.addEventListener('click', () => { if (!jobSubmit.disabled) { if (!existingWx) localStorage.setItem('matchai_wechat', jobWxInput.value.trim()); triggerMatch('job'); } });
+
+  // ---------- SKILL: form ----------
+  const skillCats = [
+    { emoji:'🎨', name:'设计',  tags:['Figma','PS','AI','3D'] },
+    { emoji:'💻', name:'编程',  tags:['Python','JS','SQL'] },
+    { emoji:'🌐', name:'语言',  tags:['英语','日语','韩语'] },
+    { emoji:'🎵', name:'音乐',  tags:['吉他','钢琴','唱歌'] },
+    { emoji:'🏊', name:'运动',  tags:['游泳','羽毛球','瑜伽'] },
+    { emoji:'✍️', name:'写作',  tags:['剧本','公众号','小说'] },
+  ];
+  function renderSkillCats(containerId, prefix) {
+    document.getElementById(containerId).innerHTML = skillCats.map(c => `
+      <div class="cat">
+        <div class="cat-head"><span class="cat-emoji">${c.emoji}</span><span>${c.name}</span></div>
+        <div class="tags">${c.tags.map(t => `<div class="tag" data-t="${prefix}-${t}">${t}</div>`).join('')}</div>
+      </div>`).join('');
+  }
+  renderSkillCats('cats-skill-have', 'have');
+  renderSkillCats('cats-skill-want', 'want');
+  const skillHave = new Set(), skillWant = new Set();
+  const skillSubmit = document.getElementById('submit-skill');
+  const skillWxInput = document.getElementById('wx-input-skill');
+  if (existingWx) document.querySelector('.skill-wx').style.display = 'none';
+  function skillCheck() {
+    document.getElementById('count-skill-have').textContent = skillHave.size;
+    document.getElementById('count-skill-want').textContent = skillWant.size;
+    document.getElementById('hint-skill-have').textContent = skillHave.size < 1 ? '至少 1 个' : (skillHave.size>=5 ? '已满' : `${5-skillHave.size} 个余量`);
+    document.getElementById('hint-skill-want').textContent = skillWant.size < 1 ? '至少 1 个' : (skillWant.size>=5 ? '已满' : `${5-skillWant.size} 个余量`);
+    const wxOk = existingWx || WX_RE.test(skillWxInput.value.trim());
+    skillSubmit.disabled = !(skillHave.size>=1 && skillHave.size<=5 && skillWant.size>=1 && skillWant.size<=5 && wxOk);
+  }
+  document.querySelectorAll('#cats-skill-have .tag').forEach(t => t.addEventListener('click', () => {
+    const v = t.dataset.t;
+    if (skillHave.has(v)) { skillHave.delete(v); t.classList.remove('on'); }
+    else { if (skillHave.size>=5) return; skillHave.add(v); t.classList.add('on'); }
+    skillCheck();
+  }));
+  document.querySelectorAll('#cats-skill-want .tag').forEach(t => t.addEventListener('click', () => {
+    const v = t.dataset.t;
+    if (skillWant.has(v)) { skillWant.delete(v); t.classList.remove('on'); }
+    else { if (skillWant.size>=5) return; skillWant.add(v); t.classList.add('on'); }
+    skillCheck();
+  }));
+  skillWxInput.addEventListener('input', skillCheck);
+  skillSubmit.addEventListener('click', () => { if (!skillSubmit.disabled) { if (!existingWx) localStorage.setItem('matchai_wechat', skillWxInput.value.trim()); triggerMatch('skill'); } });
+
+  // ---------- BARTER: form ----------
+  const barterCats = ['书籍','盲盒','手办','潮玩','其他'];
+  document.getElementById('barter-cat').innerHTML = barterCats.map(c => `<div class="radio" data-v="${c}">${c}</div>`).join('');
+  const barterState = { cat:null };
+  const barterSubmit = document.getElementById('submit-barter');
+  const barterWxInput = document.getElementById('wx-input-barter');
+  if (existingWx) document.querySelector('.barter-wx').style.display = 'none';
+  function barterCheck() {
+    const desc = document.getElementById('barter-desc').value.trim();
+    const want = document.getElementById('barter-want').value.trim();
+    const wxOk = existingWx || WX_RE.test(barterWxInput.value.trim());
+    barterSubmit.disabled = !(barterState.cat && desc && want && wxOk);
+  }
+  document.querySelectorAll('#barter-cat .radio').forEach(r => r.addEventListener('click', () => {
+    document.querySelectorAll('#barter-cat .radio').forEach(x => x.classList.remove('on'));
+    r.classList.add('on'); barterState.cat = r.dataset.v; barterCheck();
+  }));
+  ['barter-desc','barter-want'].forEach(id => document.getElementById(id).addEventListener('input', barterCheck));
+  barterWxInput.addEventListener('input', barterCheck);
+  barterSubmit.addEventListener('click', () => { if (!barterSubmit.disabled) { if (!existingWx) localStorage.setItem('matchai_wechat', barterWxInput.value.trim()); triggerMatch('barter'); } });
+
+  // ---------- A → B → C trigger ----------
+  function triggerMatch(scene) {
+    sessionStorage.setItem('matchai_' + scene + '_demo', 'B');
+    showSceneState(scene);
+    document.getElementById('scroll').scrollTop = 0;
+    setTimeout(() => {
+      localStorage.setItem('matchai_' + scene + '_activated', '1');
+      sessionStorage.removeItem('matchai_' + scene + '_demo');
+      showSceneState(scene);
+    }, 3000);
+  }
+
+  // ---------- Result data per scene ----------
+  const RESULTS = {
+    buddy: [
+      { id:'linxi', initial:'林', name:'林夕',  pct:92, meta:'女 · 23 · 杭州', hot:true,  tags:['徒步','电影','咖啡'], quote:'你们都喜欢徒步、电影和咖啡。林夕周末常去万象城那家独立咖啡，可以约一起。' },
+      { id:'miya',  initial:'M',  name:'Miya',  pct:76, meta:'女 · 25 · 杭州', hot:false, tags:['摄影','读书','旅行'], quote:'Miya 也喜欢摄影和读书，可以聊聊最近在追的剧。' },
+      { id:'kayla', initial:'K',  name:'Kayla', pct:71, meta:'女 · 24 · 杭州', hot:false, tags:['脱口秀','音乐节'],   quote:'Kayla 是脱口秀爱好者，常去 livehouse。' },
+    ],
+    lover: [
+      { id:'chenleyao', initial:'陈', name:'陈乐瑶', pct:88, meta:'女 · 25 · 杭州', hot:true, tags:['文艺','内向','上进'], quote:'你们性格互补，都喜欢周末看展和散步。她也在追求长期稳定的关系。' },
+    ],
+    job: [
+      { id:'zhangzhe', initial:'张', name:'张哲', pct:85, meta:'男 · 复旦计算机 · 大四', hot:true,  tags:['内推','腾讯','秋招'], quote:'已拿腾讯 SP，可以帮你内推秋招岗，也想认识更多前端同行。' },
+      { id:'linxue',   initial:'林', name:'林雪', pct:78, meta:'女 · 浙大金融 · 字节',   hot:false, tags:['金融','互联网','已毕业'], quote:'互联网金融岗位经验，可以聊聊薪酬和组架构信息。' },
+      { id:'wangqi',   initial:'王', name:'王琪', pct:70, meta:'男 · 北大新传 · 研二',   hot:false, tags:['内容','新传','踩坑'], quote:'新传内容方向研二，求职踩过的坑可以分享给你。' },
+    ],
+    skill: [
+      { id:'zhoulun', initial:'周', name:'周伦', pct:82, meta:'设计师 · 想学 Python（你正好会）', hot:true,  tags:['Figma','PS','想学Python'], quote:'我教你 Figma 高阶，你教我 Python 自动化，每周一次互换。' },
+      { id:'liming',  initial:'李', name:'李明', pct:79, meta:'程序员 · 想学吉他',                 hot:false, tags:['Python','后端','想学吉他'], quote:'下班想学吉他放松，你能教入门最好不过。' },
+      { id:'sushan',  initial:'苏', name:'苏珊', pct:65, meta:'英语老师 · 想学日语',                hot:false, tags:['英语','想学日语'],         quote:'想学日语去东京旅居，可以日英互换练习。' },
+    ],
+    barter: [
+      { id:'anan', initial:'阿', name:'阿楠', pct:90, meta:'女 · 想用《置身事内》换泡泡玛特', hot:true, tags:['书籍','盲盒','互补'], quote:'我手里两本崭新《置身事内》，想换泡泡玛特，你刚好相反——稳稳的双赢。' },
+    ],
+  };
+
+  function renderResults(scene) {
+    const list = RESULTS[scene] || [];
+    const container = document.getElementById('card-list-' + scene);
+    if (!container) return;
+    container.innerHTML = list.map(m => `
       <div class="card ${m.hot?'hot':''}" data-id="${m.id}">
         <div class="card-top">
           <div class="ava">${m.initial}</div>
           <div class="nm">
             <div class="nm-line"><span class="nm-name">${m.name}</span><span class="nm-pct">${m.pct}%</span></div>
-            <div class="nm-meta">${m.gender} · ${m.age} · ${m.city}</div>
+            <div class="nm-meta">${m.meta}</div>
           </div>
         </div>
         <div class="quote">"${m.quote}"<span class="quote-from">— Aurora · 你的分身</span></div>
         <div class="pills">${m.tags.map(t=>`<span class="pill">#${t}</span>`).join('')}</div>
-      </div>
-    `).join('');
-    document.querySelectorAll('.card').forEach(c => {
+      </div>`).join('');
+    container.querySelectorAll('.card').forEach(c => {
       c.addEventListener('click', () => goPage('07_用户详情.html?id=' + c.dataset.id));
     });
   }
@@ -565,27 +917,29 @@
     else location.href = target;
   }
 
-  showBuddyState();
+  // ---------- INIT ----------
+  SCENES.forEach(s => showSceneState(s));
   document.getElementById('city').textContent = localStorage.getItem('matchai_city') || '杭州';
 
-  // Demo 状态切换器（演示用，挂在右上角）
+  // ---------- Demo cycler (acts on currentScene) ----------
   const demoBtn = document.createElement('button');
   demoBtn.className = 'demo-toggle';
   demoBtn.textContent = '演示·切状态';
   demoBtn.onclick = () => {
-    const cur = sessionStorage.getItem('matchai_buddy_demo') ||
-                (localStorage.getItem('matchai_buddy_activated') ? 'C' : 'A');
+    const s = currentScene;
+    const cur = sessionStorage.getItem('matchai_' + s + '_demo') ||
+                (localStorage.getItem('matchai_' + s + '_activated') ? 'C' : 'A');
     const next = cur === 'A' ? 'B' : (cur === 'B' ? 'C' : 'A');
     if (next === 'A') {
-      localStorage.removeItem('matchai_buddy_activated');
-      sessionStorage.removeItem('matchai_buddy_demo');
+      localStorage.removeItem('matchai_' + s + '_activated');
+      sessionStorage.removeItem('matchai_' + s + '_demo');
     } else if (next === 'B') {
-      sessionStorage.setItem('matchai_buddy_demo', 'B');
+      sessionStorage.setItem('matchai_' + s + '_demo', 'B');
     } else {
-      localStorage.setItem('matchai_buddy_activated', '1');
-      sessionStorage.removeItem('matchai_buddy_demo');
+      localStorage.setItem('matchai_' + s + '_activated', '1');
+      sessionStorage.removeItem('matchai_' + s + '_demo');
     }
-    showBuddyState();
+    showSceneState(s);
   };
   document.querySelector('.page').appendChild(demoBtn);
 
