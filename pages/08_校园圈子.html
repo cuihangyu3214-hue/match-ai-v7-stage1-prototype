@@ -296,8 +296,16 @@
   };
 
   // ===== 认证逻辑 =====
-  const authedSchool = localStorage.getItem('matchai_school');
-  if (authedSchool) {
+  // URL 参数 ?authed=1 → 强制视为已认证（演示用）
+  // URL 参数 ?authed=0 → 强制视为未认证
+  const urlAuth = new URLSearchParams(location.search).get('authed');
+  if (urlAuth === '1') {
+    localStorage.setItem('matchai_school', '浙江大学');
+    showCircle();
+  } else if (urlAuth === '0') {
+    localStorage.removeItem('matchai_school');
+    showAuth();
+  } else if (localStorage.getItem('matchai_school')) {
     showCircle();
   } else {
     showAuth();
