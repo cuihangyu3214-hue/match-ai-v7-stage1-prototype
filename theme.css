@@ -89,14 +89,15 @@ button:focus-visible, [role="button"]:focus-visible {
 /* === Reusable === */
 .btn-primary {
   width: 100%; padding: 16px;
-  background: var(--accent); color: white;
-  font-size: var(--fs-md); font-weight: 600; letter-spacing: -0.01em;
-  border-radius: var(--r-md);
-  transition: transform var(--d-1) var(--ease), background var(--d-1) var(--ease);
+  background: var(--accent); color: #fff;
+  font-size: 16px; font-weight: 600; letter-spacing: 0.02em;
+  border-radius: 16px;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, 0 6px 16px var(--accent-soft);
+  transition: transform var(--d-1) var(--ease), background var(--d-1) var(--ease), box-shadow var(--d-1) var(--ease);
 }
-.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:hover { background: var(--accent-hover); box-shadow: 0 1px 0 rgba(255,255,255,0.2) inset, 0 8px 22px var(--accent-soft); }
 .btn-primary:active { transform: scale(0.98); }
-.btn-primary:disabled { background: var(--border-strong); color: var(--fg-faint); cursor: not-allowed; }
+.btn-primary:disabled { background: var(--border-strong); color: var(--fg-faint); cursor: not-allowed; box-shadow: none; }
 
 .btn-ghost {
   padding: 8px 14px; font-size: var(--fs-sm); color: var(--fg-mute);

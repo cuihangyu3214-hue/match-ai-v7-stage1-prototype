@@ -22,9 +22,13 @@
   .topbar .step { font-size: var(--fs-xs); color: var(--fg-faint); font-weight: 500; }
 
   .body {
-    flex: 1; padding: 16px var(--sp-5) var(--sp-5);
+    flex: 1; min-height: 0;
+    overflow-y: auto;
+    padding: 16px var(--sp-5) var(--sp-5);
     display: flex; flex-direction: column; gap: 28px;
+    scrollbar-width: none;
   }
+  .body::-webkit-scrollbar { display: none; }
 
   .header h1 {
     font-size: 28px; font-weight: 700; letter-spacing: -0.03em;
@@ -99,12 +103,14 @@
   .quick-label { font-size: var(--fs-xs); color: var(--fg-faint); margin-bottom: var(--sp-2); }
 
   .footer {
-    margin-top: auto; padding: var(--sp-5) var(--sp-5) var(--sp-5);
+    flex-shrink: 0;
+    padding: 16px var(--sp-5) max(20px, env(safe-area-inset-bottom));
     background: var(--bg-app);
+    border-top: 1px solid var(--border);
   }
   .privacy-note {
-    text-align: center; margin-top: var(--sp-3);
-    font-size: var(--fs-xs); color: var(--fg-faint);
+    text-align: center; margin-top: 10px;
+    font-size: 11px; color: var(--fg-faint);
   }
 
   /* Bottom sheet for city picker */
@@ -218,7 +224,7 @@
   </div>
 
   <div class="footer">
-    <button class="btn-primary" id="submit" disabled>完成 · 进入首页</button>
+    <button class="btn-primary" id="submit" disabled>开始</button>
     <p class="privacy-note">仅用于匹配，可在「我的」中随时修改</p>
   </div>
 
