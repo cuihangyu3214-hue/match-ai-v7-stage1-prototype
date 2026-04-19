@@ -515,15 +515,12 @@
         </div>
       </div>
 
-      <!-- B 等待中（含两种子情况：本期未到 / 本期已结束）-->
+      <!-- B 等待中：仅展示等待信息 -->
       <div class="state" id="lover-B">
         <div class="cycle-wait">
           <div class="cycle-emoji">💕</div>
-          <h2 class="cycle-title" id="cycle-title">下次匹配 周四 20:00</h2>
-          <p class="cycle-sub" id="cycle-sub">还有 3 天 · 你已在匹配池</p>
-          <div class="cycle-actions">
-            <button class="cycle-btn-ghost" id="lover-edit">调整资料</button>
-          </div>
+          <h2 class="cycle-title">你已加入本周匹配池</h2>
+          <p class="cycle-sub">周四 20:00 公布 · 还有 3 天<br><span style="opacity:0.6">想调整资料？看完本期结果再改 · 下周生效</span></p>
         </div>
       </div>
 
@@ -535,8 +532,9 @@
         </div>
         <div id="card-list-lover"></div>
         <p style="text-align:center;font-size:11px;color:var(--fg-faint);margin-top:14px;">深度匹配 · 一周一次 · 慢即是快</p>
-        <div style="text-align:center;margin-top:18px;">
-          <button class="cycle-btn-ghost" id="lover-edit-2">调整资料</button>
+        <div style="text-align:center;margin-top:22px;padding-top:16px;border-top:1px solid var(--border);">
+          <p style="font-size:12px;color:var(--fg-mute);margin-bottom:10px;">不太合适？调一下，下周四生效</p>
+          <button class="cycle-btn-ghost" id="lover-edit-2">调整资料 · 下次生效</button>
         </div>
       </div>
     </div>
@@ -893,14 +891,34 @@
     document.getElementById('scroll').scrollTop = 0;
   });
 
-  // 伴侣"调整资料"按钮：回到 A 状态
-  ['lover-edit', 'lover-edit-2'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('click', () => {
+  // 伴侣"调整资料"按钮（仅 C 状态有）：进入编辑模式
+  const loverEditBtn = document.getElementById('lover-edit-2');
+  if (loverEditBtn) {
+    loverEditBtn.addEventListener('click', () => {
+      sessionStorage.setItem('matchai_lover_editing', '1');
       sessionStorage.setItem('matchai_lover_demo', 'A');
       showSceneState('lover');
       document.getElementById('scroll').scrollTop = 0;
     });
+  }
+
+  // 编辑模式下提交：回 C + toast "已更新 · 下周四生效"
+  // 已在 loverSubmit handler 里通过 editing flag 控制（见上面 submit）
+  // 但要在 submit 里检测 editing flag
+  // 让我通过修改 loverSubmit 行为，监听 editing 标志
+  loverSubmit.addEventListener('click', () => {
+    const editing = sessionStorage.getItem('matchai_lover_editing');
+    if (editing) {
+      sessionStorage.removeItem('matchai_lover_editing');
+      sessionStorage.setItem('matchai_lover_demo', 'C');
+      showSceneState('lover');
+      // toast
+      const t = document.createElement('div');
+      t.style.cssText = 'position:absolute;top:60px;left:50%;transform:translateX(-50%);background:var(--fg);color:var(--bg-elev);padding:10px 16px;border-radius:12px;font-size:13px;font-weight:500;z-index:100;box-shadow:var(--shadow-2);';
+      t.textContent = '✓ 已更新 · 下周四生效';
+      document.querySelector('.page').appendChild(t);
+      setTimeout(() => t.remove(), 2200);
+    }
   });
 
   // ---------- JOB: form ----------
