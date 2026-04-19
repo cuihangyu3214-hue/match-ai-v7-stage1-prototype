@@ -178,6 +178,21 @@
     margin-top: 4px; letter-spacing: 0.04em;
   }
   .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* 场景填表用的 chip 选项 */
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill-opt {
+    padding: 7px 12px; border-radius: var(--r-pill);
+    background: var(--bg-elev); border: 1.2px solid var(--border);
+    font-size: 13px; color: var(--fg); font-weight: 500;
+    cursor: pointer; user-select: none; line-height: 1.2;
+    transition: all var(--d-1) var(--ease);
+    display: inline-block;
+  }
+  .pill-opt:hover { border-color: var(--border-strong); }
+  .pill-opt.on {
+    background: var(--accent); color: white; border-color: var(--accent);
+  }
   .pill {
     font-size: 11px; padding: 3px 9px;
     background: var(--accent-soft); color: var(--accent);
@@ -283,6 +298,17 @@
     { k: 'game',   emoji: '🎮', name: '开黑' },
   ];
 
+  // 每个场景的填表字段
+  const FORMS = {
+    lib:   [ {label:'常去地点', opts:['玉泉','紫金港','西溪','华家池']}, {label:'时间段', opts:['早 8 点','上午','下午','晚 7 点']} ],
+    study: [ {label:'常去地点', opts:['玉泉','紫金港','西溪','宿舍']}, {label:'时间段', opts:['早晨','上午','下午','晚上']} ],
+    eat:   [ {label:'食堂',     opts:['玉泉','紫金港','西溪','华家池']}, {label:'口味',   opts:['不辣','西餐','面食','清淡','重口','素食']} ],
+    gym:   [ {label:'项目',     opts:['撸铁','跑步','瑜伽','普拉提','游泳','球类']}, {label:'时间', opts:['早','下午','晚']} ],
+    kao:   [ {label:'阶段',     opts:['刚开始','基础','强化','冲刺','复试','二战']}, {label:'方向', opts:['计算机','金融','法律','管理','医学','其他']} ],
+    movie: [ {label:'类型',     opts:['艺术片','商业片','纪录片','动漫','恐怖','爱情','悬疑']} ],
+    game:  [ {label:'游戏',     opts:['LOL','王者','吃鸡','原神','永劫','CS']}, {label:'段位', opts:['新手','白银','黄金','钻石','王者']} ],
+  };
+
   // mock 结果（按场景）
   const RESULTS = {
     lib:   [{ id:'lib1', initial:'刘', name:'刘星辰', meta:'男 · 玉泉', tags:['考研','深度专注'], quote:'TA 周一-五早 8 点固定在玉泉一楼，长期搭档型。' }],
@@ -372,17 +398,62 @@
     const scrollEl = document.getElementById('scroll');
 
     if (!activated) {
-      // A 没参加: 一键参与
+      // A 没参加: 显示填表
+      const fields = FORMS[scene.k] || [];
+      const needWx = !localStorage.getItem('matchai_wechat');
+      const fieldsHtml = fields.map((f, i) => `
+        <div style="margin-top:18px;">
+          <div style="font-size:12px;font-weight:600;color:var(--fg);margin-bottom:8px;">${f.label} <span style="color:var(--accent);font-weight:600;">必选 1+</span></div>
+          <div class="tags" data-fld="${i}">
+            ${f.opts.map(o => `<span class="pill-opt" data-v="${o}">${o}</span>`).join('')}
+          </div>
+        </div>
+      `).join('');
+      const wxHtml = needWx ? `
+        <div style="margin-top:18px;">
+          <div style="font-size:12px;font-weight:600;color:var(--fg);margin-bottom:6px;">微信号</div>
+          <input id="wx-circle" class="field-input" type="text" placeholder="你的微信号" autocomplete="off"/>
+          <div style="margin-top:6px;font-size:11px;color:var(--fg-faint);">字母开头 6-20 位 · 一次填写所有场景通用</div>
+        </div>
+      ` : '';
       scrollEl.innerHTML = `
-        <div style="text-align:center;padding:60px 20px 40px;">
-          <div style="font-size:48px;margin-bottom:16px;opacity:0.85;">${scene.emoji}</div>
-          <h2 style="font-size:20px;font-weight:700;letter-spacing:-0.02em;color:var(--fg);">${scene.name}搭子</h2>
-          <p style="font-size:13px;color:var(--fg-mute);margin-top:6px;line-height:1.5;">同校 · 实时匹配 · 微信号通用</p>
-          <button class="btn-primary" id="join-btn" style="margin-top:28px;max-width:200px;">参加</button>
+        <div style="margin-bottom:8px;">
+          <div style="font-size:30px;line-height:1;">${scene.emoji}</div>
+          <h2 style="font-size:20px;font-weight:700;letter-spacing:-0.02em;color:var(--fg);margin-top:10px;">${scene.name}搭子</h2>
+          <p style="font-size:13px;color:var(--fg-mute);margin-top:4px;">填一下信息，AI 帮你找同校合拍的人</p>
+        </div>
+        ${fieldsHtml}
+        ${wxHtml}
+        <div style="margin-top:24px;">
+          <button class="btn-primary" id="join-btn" disabled>开始匹配</button>
         </div>
       `;
-      document.getElementById('join-btn').addEventListener('click', () => {
-        localStorage.setItem('matchai_school_' + scene.k, '1');
+
+      // 字段选择 (多选)
+      const selected = fields.map(() => new Set());
+      scrollEl.querySelectorAll('[data-fld]').forEach((wrap, idx) => {
+        wrap.querySelectorAll('.pill-opt').forEach(opt => {
+          opt.addEventListener('click', () => {
+            const v = opt.dataset.v;
+            if (selected[idx].has(v)) { selected[idx].delete(v); opt.classList.remove('on'); }
+            else { selected[idx].add(v); opt.classList.add('on'); }
+            checkJoin();
+          });
+        });
+      });
+      const wxInput = document.getElementById('wx-circle');
+      wxInput?.addEventListener('input', checkJoin);
+      const joinBtn = document.getElementById('join-btn');
+      const WX_RE = /^[A-Za-z][A-Za-z0-9_-]{5,19}$/;
+      function checkJoin() {
+        const allFilled = selected.every(s => s.size > 0);
+        const wxOk = !needWx || WX_RE.test(wxInput.value.trim());
+        joinBtn.disabled = !(allFilled && wxOk);
+      }
+      joinBtn.addEventListener('click', () => {
+        if (joinBtn.disabled) return;
+        if (needWx) localStorage.setItem('matchai_wechat', wxInput.value.trim());
+        localStorage.setItem('matchai_school_' + scene.k, JSON.stringify(selected.map(s => [...s])));
         renderTabs();
       });
     } else {
