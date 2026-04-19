@@ -6,6 +6,7 @@
 <title>Match AI · 首页</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../theme.css">
 <style>
   .page { display: flex; flex-direction: column; }
@@ -14,7 +15,7 @@
   .brandbar {
     flex-shrink: 0;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 8px 24px 12px;
+    padding: 8px 24px 10px;
   }
   .brand-name {
     font-family: 'Space Grotesk', 'Inter', sans-serif;
@@ -34,105 +35,249 @@
   .city-chip svg { width: 12px; height: 12px; color: var(--fg-mute); }
   .city-chip:hover svg { color: var(--accent); }
 
-  /* 滚动区 */
+  /* === 顶部 chip tab bar === */
+  .tabbar-wrap {
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-app);
+  }
+  .tabbar {
+    display: flex; gap: 4px;
+    padding: 6px 18px 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabbar::-webkit-scrollbar { display: none; }
+  .chip {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    position: relative;
+    padding: 10px 14px 12px;
+    font-size: 14px; font-weight: 500;
+    color: var(--fg-faint);
+    cursor: pointer;
+    transition: color var(--d-1) var(--ease);
+    white-space: nowrap;
+    background: none; border: none;
+  }
+  .chip:hover { color: var(--fg-mute); }
+  .chip.on {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .chip.on::after {
+    content: '';
+    position: absolute; left: 12px; right: 12px; bottom: 0;
+    height: 2px; background: var(--accent);
+    border-radius: 2px 2px 0 0;
+  }
+
+  /* 内容滚动 */
   .scroll {
     flex: 1; min-height: 0;
     overflow-y: auto;
-    padding: 4px 20px 20px;
+    padding: 16px 20px 20px;
     scrollbar-width: none;
   }
   .scroll::-webkit-scrollbar { display: none; }
 
-  /* 模块卡 */
-  .module {
+  /* === 状态 A：嵌入填信息 === */
+  .form-hint {
+    font-size: 13px; color: var(--fg-mute);
+    margin-bottom: 14px; line-height: 1.5;
+  }
+  .form-hint strong { color: var(--fg); font-weight: 600; }
+
+  .wx-block { margin-bottom: 18px; }
+  .wx-label {
+    font-size: 12px; font-weight: 600; color: var(--fg);
+    margin-bottom: 6px; letter-spacing: 0.01em;
+  }
+  .wx-input {
+    width: 100%; padding: 12px 14px;
+    background: var(--bg-elev);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-family: inherit; font-size: 15px; color: var(--fg);
+    transition: border-color var(--d-1) var(--ease);
+  }
+  .wx-input:focus { outline: none; border-color: var(--accent); }
+  .wx-hint {
+    margin-top: 6px;
+    font-size: 11px; color: var(--fg-faint);
+  }
+
+  .progress-row {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 12px; color: var(--fg-mute);
+    margin-bottom: 4px;
+  }
+  .progress-row .count { font-weight: 700; color: var(--fg); }
+
+  .cat { margin-top: 14px; }
+  .cat-head {
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 8px;
+    font-size: 12px; font-weight: 600;
+    color: var(--fg);
+    letter-spacing: 0.01em;
+  }
+  .cat-emoji { font-size: 14px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag {
+    padding: 7px 12px; border-radius: var(--r-pill);
+    background: var(--bg-elev);
+    border: 1.2px solid var(--border);
+    font-size: 13px; color: var(--fg); font-weight: 500;
+    cursor: pointer; user-select: none;
+    transition: all var(--d-1) var(--ease);
+    line-height: 1.2;
+  }
+  .tag:hover { border-color: var(--border-strong); }
+  .tag.on {
+    background: var(--accent); color: white; border-color: var(--accent);
+  }
+
+  .submit-wrap { margin-top: 22px; }
+
+  /* === 状态 C：结果列表 === */
+  .result-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .result-title {
+    font-size: 18px; font-weight: 700; letter-spacing: -0.02em;
+    color: var(--fg);
+  }
+  .result-title .num {
+    color: var(--accent);
+  }
+  .result-sub {
+    font-size: 11px; color: var(--fg-faint);
+    font-weight: 500;
+  }
+
+  /* === 高级匹配卡 === */
+  .pcard {
+    position: relative;
     background: var(--bg-elev);
     border: 1px solid var(--border);
     border-radius: 20px;
-    padding: 16px;
-    margin-bottom: 14px;
-    transition: all var(--d-1) var(--ease);
-  }
-  .module.locked { opacity: 0.5; }
-
-  .module-head {
-    display: flex; align-items: center; gap: 10px;
+    padding: 18px;
     margin-bottom: 12px;
+    cursor: pointer;
+    transition: transform var(--d-1) var(--ease), box-shadow var(--d-2) var(--ease);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
   }
-  .module-emoji {
-    font-size: 18px; line-height: 1;
+  .pcard::before {
+    /* 顶部 inset 高光线 */
+    content: '';
+    position: absolute; left: 16px; right: 16px; top: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--inset-hi), transparent);
+    pointer-events: none;
   }
-  .module-title {
-    font-size: 15px; font-weight: 600;
-    color: var(--fg); letter-spacing: -0.01em;
-    flex: 1;
+  .pcard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 1px 0 var(--inset-hi) inset, 0 4px 8px rgba(10,10,11,0.06), 0 16px 36px rgba(10,10,11,0.10), 0 32px 60px rgba(10,10,11,0.06);
   }
-  .module-freq {
-    font-size: 11px; color: var(--fg-mute);
-    padding: 3px 8px; background: var(--bg-app);
+  .pcard.high {
+    border-color: transparent;
+    box-shadow: var(--shadow-card), 0 0 0 1px var(--accent-soft), 0 16px 40px var(--accent-soft);
+  }
+  .pcard.high::after {
+    /* 顶部渐变 accent 层 */
+    content: '';
+    position: absolute; left: 0; right: 0; top: 0; height: 60px;
+    background: linear-gradient(180deg, var(--accent-soft), transparent);
+    pointer-events: none;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .pcard-top {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .pcard-avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 20px; font-weight: 600;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 1.5px var(--inset-hi) inset, 0 4px 14px var(--accent-soft), 0 1px 3px rgba(0,0,0,0.12);
+  }
+  .pcard-meta { flex: 1; min-width: 0; }
+  .pcard-name-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px;
+  }
+  .pcard-name {
+    font-size: 17px; font-weight: 700; color: var(--fg);
+    letter-spacing: -0.01em;
+  }
+  .pcard-pct {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-size: 16px; font-weight: 700; color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+  .pcard-bio {
+    margin-top: 3px;
+    font-size: 12px; color: var(--fg-mute);
+  }
+
+  .pcard-quote {
+    position: relative; z-index: 1;
+    margin: 14px 0 12px;
+    padding: 10px 12px 10px 14px;
+    border-left: 2px solid var(--accent);
+    font-family: 'Fraunces', 'Inter', serif;
+    font-style: italic;
+    font-size: 14px; line-height: 1.5;
+    color: var(--fg);
+  }
+  .pcard-quote-from {
+    display: block;
+    margin-top: 6px;
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-size: 11px; font-weight: 500;
+    color: var(--fg-faint);
+    letter-spacing: 0.04em;
+    text-align: right;
+  }
+
+  .pcard-pills {
+    position: relative; z-index: 1;
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .pcard-pill {
+    padding: 5px 11px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 12px; font-weight: 600;
     border-radius: var(--r-pill);
   }
 
-  /* 内嵌结果行 */
-  .row {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 8px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: background var(--d-1) var(--ease);
-  }
-  .row + .row { margin-top: 2px; }
-  .row:hover { background: var(--bg-app); }
-
-  .mini-avatar {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-size: 13px; font-weight: 600;
-    flex-shrink: 0;
-  }
-  .row-info { flex: 1; min-width: 0; }
-  .row-name {
-    font-size: 14px; font-weight: 600; color: var(--fg);
-    display: flex; align-items: center; gap: 8px;
-  }
-  .row-pct {
-    font-size: 12px; font-weight: 700; color: var(--accent);
-  }
-  .row-tags {
-    font-size: 11px; color: var(--fg-mute);
-    margin-top: 2px;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .row-arr {
-    width: 14px; height: 14px;
-    color: var(--fg-faint);
-    flex-shrink: 0;
-  }
-
-  /* 激活提示行 */
-  .activate-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 12px;
-    background: var(--accent-soft);
-    border-radius: 14px;
-    cursor: pointer;
-    transition: all var(--d-1) var(--ease);
-  }
-  .activate-row:hover { background: var(--accent); color: white; }
-  .activate-row:hover .ac-text,
-  .activate-row:hover .ac-arr { color: white; }
-  .ac-text { font-size: 14px; font-weight: 600; color: var(--accent); }
-  .ac-arr { width: 16px; height: 16px; color: var(--accent); }
-
-  /* 空占位 */
-  .placeholder {
+  /* === 状态 B：等待 === */
+  .wait-wrap {
     text-align: center;
-    padding: 18px 12px;
+    padding: 60px 20px;
+  }
+  .wait-emoji { font-size: 36px; margin-bottom: 12px; }
+  .wait-title { font-size: 17px; font-weight: 700; color: var(--fg); margin-bottom: 6px; }
+  .wait-sub { font-size: 13px; color: var(--fg-mute); }
+
+  /* === 占位（其他 4 tab） === */
+  .empty-tab {
+    text-align: center;
+    padding: 80px 24px;
     color: var(--fg-faint);
   }
-  .placeholder .pri { font-size: 13px; font-weight: 500; color: var(--fg-mute); }
-  .placeholder .sec { font-size: 11px; margin-top: 2px; }
+  .empty-emoji { font-size: 40px; margin-bottom: 12px; opacity: 0.6; }
+  .empty-title { font-size: 15px; font-weight: 600; color: var(--fg-mute); margin-bottom: 4px; }
+  .empty-sub { font-size: 12px; color: var(--fg-faint); }
 
   /* 吸底 Tab */
   .tab-bar {
@@ -142,16 +287,16 @@
     border-top: 1px solid var(--border);
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
-  .tab {
+  .botab {
     flex: 1; padding: 10px 0 8px;
     display: flex; flex-direction: column; align-items: center; gap: 2px;
     color: var(--fg-faint);
     cursor: pointer;
     transition: color var(--d-1) var(--ease);
   }
-  .tab:hover, .tab.active { color: var(--accent); }
-  .tab svg { width: 22px; height: 22px; stroke-width: 2; }
-  .tab span { font-size: 10px; font-weight: 500; letter-spacing: 0.02em; }
+  .botab:hover, .botab.active { color: var(--accent); }
+  .botab svg { width: 22px; height: 22px; stroke-width: 2; }
+  .botab span { font-size: 10px; font-weight: 500; letter-spacing: 0.02em; }
 
   /* Toast */
   .toast {
@@ -188,82 +333,28 @@
     </span>
   </div>
 
-  <div class="scroll">
-
-    <!-- 合拍搭子 -->
-    <div class="module" id="mod-buddy">
-      <div class="module-head">
-        <span class="module-emoji">🤝</span>
-        <span class="module-title">合拍搭子</span>
-        <span class="module-freq">每天 1 次</span>
-      </div>
-      <div id="buddy-body"><!-- 动态注入 --></div>
+  <div class="tabbar-wrap">
+    <div class="tabbar" id="tabbar">
+      <button class="chip on" data-scene="buddy">合拍搭子</button>
+      <button class="chip" data-scene="lover">合拍伴侣</button>
+      <button class="chip" data-scene="job">实习求职</button>
+      <button class="chip" data-scene="skill">技能交换</button>
+      <button class="chip" data-scene="goods">易物</button>
     </div>
-
-    <!-- 合拍伴侣 -->
-    <div class="module locked">
-      <div class="module-head">
-        <span class="module-emoji">💕</span>
-        <span class="module-title">合拍伴侣</span>
-        <span class="module-freq">周四 20:00</span>
-      </div>
-      <div class="placeholder">
-        <div class="pri">暂未开放</div>
-        <div class="sec">即将上线</div>
-      </div>
-    </div>
-
-    <!-- 实习求职 -->
-    <div class="module locked">
-      <div class="module-head">
-        <span class="module-emoji">💼</span>
-        <span class="module-title">实习求职</span>
-        <span class="module-freq">每周 1 次</span>
-      </div>
-      <div class="placeholder">
-        <div class="pri">暂未开放</div>
-        <div class="sec">即将上线</div>
-      </div>
-    </div>
-
-    <!-- 技能交换 -->
-    <div class="module locked">
-      <div class="module-head">
-        <span class="module-emoji">🔄</span>
-        <span class="module-title">技能交换</span>
-        <span class="module-freq">每 3 天 1 次</span>
-      </div>
-      <div class="placeholder">
-        <div class="pri">暂未开放</div>
-        <div class="sec">即将上线</div>
-      </div>
-    </div>
-
-    <!-- 易物 -->
-    <div class="module locked">
-      <div class="module-head">
-        <span class="module-emoji">📦</span>
-        <span class="module-title">易物</span>
-        <span class="module-freq">每周 1 次</span>
-      </div>
-      <div class="placeholder">
-        <div class="pri">暂未开放</div>
-        <div class="sec">即将上线</div>
-      </div>
-    </div>
-
   </div>
 
+  <div class="scroll" id="scroll"></div>
+
   <div class="tab-bar">
-    <div class="tab active">
+    <div class="botab active">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
       <span>首页</span>
     </div>
-    <div class="tab" onclick="showToast('圈子 Tab 待阶段 3 实现')">
+    <div class="botab" onclick="showToast('圈子 Tab 待阶段 3 实现')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
       <span>圈子</span>
     </div>
-    <div class="tab" onclick="showToast('我的 Tab 待阶段 3 实现')">
+    <div class="botab" onclick="showToast('我的 Tab 待阶段 3 实现')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
       <span>我的</span>
     </div>
@@ -288,42 +379,189 @@
     }
   }
 
-  // 城市
   const city = localStorage.getItem('matchai_city') || '杭州';
   document.getElementById('city').textContent = city;
 
-  // 内嵌结果数据（也复用为详情页数据源）
+  // === 数据 ===
   const buddyMatches = [
-    { id: 'linxi',  initial: '林', name: '林夕',  pct: 92, tags: '徒步 · 电影 · 咖啡' },
-    { id: 'miya',   initial: 'M',  name: 'Miya',  pct: 76, tags: '摄影 · 读书 · 旅行' },
-    { id: 'kayla',  initial: 'K',  name: 'Kayla', pct: 71, tags: '脱口秀 · 音乐节' }
+    { id: 'linxi',  initial: '林', name: '林夕',  pct: 92, gender: '女', age: 23, city: '杭州',
+      quote: '你们都喜欢徒步、电影和咖啡。', tags: ['徒步','电影','咖啡'] },
+    { id: 'miya',   initial: 'M',  name: 'Miya',  pct: 84, gender: '女', age: 25, city: '杭州',
+      quote: '你们对摄影和川西路线有共同的好奇。', tags: ['摄影','读书','旅行'] },
+    { id: 'kayla',  initial: 'K',  name: 'Kayla', pct: 76, gender: '女', age: 24, city: '杭州',
+      quote: '脱口秀和 livehouse 的小众喜好让你们对得上拍。', tags: ['脱口秀','音乐节'] }
   ];
 
-  const buddyBody = document.getElementById('buddy-body');
-  const activated = localStorage.getItem('matchai_buddy_activated') === '1';
+  const categories = [
+    { emoji: '🏃', name: '运动', tags: ['徒步','跑步','健身','瑜伽','骑行','球类','游泳','攀岩'] },
+    { emoji: '🎬', name: '娱乐', tags: ['电影','音乐','演唱会','livehouse','脱口秀','桌游','剧本杀','KTV'] },
+    { emoji: '📚', name: '学习', tags: ['读书','编程','设计','外语','写作','摄影','播客','AI'] },
+    { emoji: '🍜', name: '生活', tags: ['美食','咖啡','烘焙','旅行','露营','宠物','花艺','手作'] },
+    { emoji: '💼', name: '职业', tags: ['创业','互联网','金融','教育','医疗','设计师','产品','律师'] },
+    { emoji: '✨', name: '社交', tags: ['游戏','社团','志愿者','派对','沙龙','市集','飞盘','滑板'] },
+  ];
 
-  if (!activated) {
-    buddyBody.innerHTML = `
-      <div class="activate-row" id="ac">
-        <span class="ac-text">立即激活，认识合拍搭子</span>
-        <svg class="ac-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>`;
-    document.getElementById('ac').addEventListener('click', () => goPage('05_合拍搭子激活.html'));
-  } else {
-    buddyBody.innerHTML = buddyMatches.map(m => `
-      <div class="row" data-id="${m.id}">
-        <div class="mini-avatar">${m.initial}</div>
-        <div class="row-info">
-          <div class="row-name">${m.name} <span class="row-pct">${m.pct}%</span></div>
-          <div class="row-tags">${m.tags}</div>
+  const scroll = document.getElementById('scroll');
+  let currentScene = 'buddy';
+
+  function renderEmpty(label) {
+    return `
+      <div class="empty-tab">
+        <div class="empty-emoji">🚧</div>
+        <div class="empty-title">${label} · 暂未开放</div>
+        <div class="empty-sub">即将上线，敬请期待</div>
+      </div>
+    `;
+  }
+
+  function renderResult() {
+    const cards = buddyMatches.map(m => `
+      <div class="pcard ${m.pct >= 85 ? 'high' : ''}" data-id="${m.id}">
+        <div class="pcard-top">
+          <div class="pcard-avatar">${m.initial}</div>
+          <div class="pcard-meta">
+            <div class="pcard-name-row">
+              <span class="pcard-name">${m.name}</span>
+              <span class="pcard-pct">${m.pct}%</span>
+            </div>
+            <div class="pcard-bio">${m.gender} · ${m.age} · ${m.city}</div>
+          </div>
         </div>
-        <svg class="row-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        <div class="pcard-quote">
+          "${m.quote}"
+          <span class="pcard-quote-from">— Aurora</span>
+        </div>
+        <div class="pcard-pills">
+          ${m.tags.map(t => `<span class="pcard-pill">#${t}</span>`).join('')}
+        </div>
       </div>
     `).join('');
-    document.querySelectorAll('.row').forEach(r => {
-      r.addEventListener('click', () => goPage('07_用户详情.html?id=' + r.dataset.id));
+
+    return `
+      <div class="result-head">
+        <div class="result-title">今日匹配 <span class="num">${buddyMatches.length}</span> 个</div>
+        <div class="result-sub">每天 1 次 · 明日刷新</div>
+      </div>
+      ${cards}
+    `;
+  }
+
+  function renderForm() {
+    const existingWx = localStorage.getItem('matchai_wechat');
+    return `
+      <div class="form-hint">填一下你的<strong>兴趣</strong>，开始匹配跟你合拍的搭子。</div>
+
+      ${existingWx ? '' : `
+        <div class="wx-block">
+          <div class="wx-label">微信号</div>
+          <input class="wx-input" id="wx-input" type="text" placeholder="你的微信号" autocomplete="off"/>
+          <div class="wx-hint">字母开头，6-20 位</div>
+        </div>
+      `}
+
+      <div class="progress-row">
+        <span>已选 <span class="count" id="count">0</span> / 至少 3</span>
+        <span id="progHint">还差 3 个</span>
+      </div>
+
+      <div id="cats">
+        ${categories.map(c => `
+          <div class="cat">
+            <div class="cat-head">
+              <span class="cat-emoji">${c.emoji}</span>
+              <span>${c.name}</span>
+            </div>
+            <div class="tags">
+              ${c.tags.map(t => `<div class="tag" data-t="${t}">${t}</div>`).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="submit-wrap">
+        <button class="btn-primary" id="submit" disabled>开始匹配</button>
+      </div>
+    `;
+  }
+
+  function bindForm() {
+    const existingWx = localStorage.getItem('matchai_wechat');
+    const wxInput = document.getElementById('wx-input');
+    const count = document.getElementById('count');
+    const hint = document.getElementById('progHint');
+    const submit = document.getElementById('submit');
+    const selected = new Set();
+
+    function wxValid() {
+      if (existingWx) return true;
+      const v = wxInput?.value.trim() || '';
+      return /^[A-Za-z][A-Za-z0-9_-]{5,19}$/.test(v);
+    }
+
+    function update() {
+      const n = selected.size;
+      count.textContent = n;
+      if (n < 3) hint.textContent = '还差 ' + (3 - n) + ' 个';
+      else hint.textContent = (n >= 5 ? '已满' : '还可以选 ' + (5 - n) + ' 个');
+      submit.disabled = !(n >= 3 && wxValid());
+    }
+
+    document.querySelectorAll('.tag').forEach(t => {
+      t.addEventListener('click', () => {
+        const v = t.dataset.t;
+        if (selected.has(v)) { selected.delete(v); t.classList.remove('on'); }
+        else { if (selected.size >= 5) return; selected.add(v); t.classList.add('on'); }
+        update();
+      });
+    });
+    wxInput?.addEventListener('input', update);
+
+    submit.addEventListener('click', () => {
+      if (submit.disabled) return;
+      if (!existingWx && wxInput) {
+        localStorage.setItem('matchai_wechat', wxInput.value.trim());
+      }
+      localStorage.setItem('matchai_buddy_tags', JSON.stringify([...selected]));
+      localStorage.setItem('matchai_buddy_activated', '1');
+      renderScene(); // 同 tab 切到状态 C
     });
   }
+
+  function bindResult() {
+    document.querySelectorAll('.pcard').forEach(c => {
+      c.addEventListener('click', () => goPage('07_用户详情.html?id=' + c.dataset.id));
+    });
+  }
+
+  function renderScene() {
+    if (currentScene !== 'buddy') {
+      const labels = { lover: '合拍伴侣', job: '实习求职', skill: '技能交换', goods: '易物' };
+      scroll.innerHTML = renderEmpty(labels[currentScene] || '');
+      scroll.scrollTop = 0;
+      return;
+    }
+    const activated = localStorage.getItem('matchai_buddy_activated') === '1';
+    if (activated) {
+      scroll.innerHTML = renderResult();
+      bindResult();
+    } else {
+      scroll.innerHTML = renderForm();
+      bindForm();
+    }
+    scroll.scrollTop = 0;
+  }
+
+  // tab 切换
+  document.querySelectorAll('.chip').forEach(c => {
+    c.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach(x => x.classList.remove('on'));
+      c.classList.add('on');
+      currentScene = c.dataset.scene;
+      renderScene();
+    });
+  });
+
+  renderScene();
 
   window.addEventListener('message', e => {
     if (e.data?.type === 'theme') document.documentElement.dataset.theme = e.data.value;
