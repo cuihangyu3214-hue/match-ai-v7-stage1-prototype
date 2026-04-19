@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-accent="indigo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Match AI · 启动页</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .splash {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: space-between;
+    padding: 80px var(--sp-5) 40px;
+    text-align: center;
+    background: radial-gradient(circle at 50% 30%, var(--accent-soft) 0%, transparent 60%);
+  }
+
+  .hero { display: flex; flex-direction: column; align-items: center; gap: var(--sp-5); }
+
+  .brand-mark {
+    width: 88px; height: 88px;
+    border-radius: 26px;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 16px 40px var(--accent-soft);
+    animation: float 5s var(--ease) infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .brand-mark svg { width: 44px; height: 44px; color: #fff; }
+
+  .product-name {
+    font-size: 32px; font-weight: 700; letter-spacing: -0.03em;
+    color: var(--fg);
+    margin-top: var(--sp-2);
+  }
+
+  .slogan {
+    font-size: 22px; font-weight: 600; letter-spacing: -0.02em;
+    color: var(--fg);
+    margin-top: var(--sp-1);
+  }
+
+  .sub-slogan {
+    font-size: var(--fs-md); font-weight: 400;
+    color: var(--fg-mute);
+    line-height: 1.6;
+    max-width: 240px;
+    margin-top: var(--sp-3);
+  }
+
+  .actions {
+    width: 100%; display: flex; flex-direction: column; gap: var(--sp-3);
+    align-items: center;
+  }
+  .start-btn {
+    width: 100%; max-width: 280px;
+  }
+  .foot {
+    font-size: var(--fs-xs);
+    color: var(--fg-faint);
+    margin-top: var(--sp-3);
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="statusbar">
+    <span>9:41</span>
+    <span class="icons">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6c5-3 15-3 20 0"/><path d="M5 10c4-2 10-2 14 0"/><path d="M8 14c2-1 6-1 8 0"/><circle cx="12" cy="18" r="1.2" fill="currentColor"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="18" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg>
+    </span>
+  </div>
+
+  <div class="splash">
+    <div class="hero">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="12" r="5"/>
+          <circle cx="15" cy="12" r="5"/>
+        </svg>
+      </div>
+      <div class="product-name">Match AI</div>
+      <div class="slogan">找到合拍的人</div>
+      <div class="sub-slogan">AI 分身 · 5 个场景 · 不尬聊</div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary start-btn" data-nav="02_基础信息.html">开始匹配</button>
+      <div class="foot">微信授权登录 · 隐私可控</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // simple navigation: works both standalone and inside iframe
+  document.querySelectorAll('[data-nav]').forEach(el => {
+    el.addEventListener('click', () => {
+      const target = el.dataset.nav;
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'nav', page: target }, '*');
+      } else {
+        location.href = target;
+      }
+    });
+  });
+  // theme sync
+  window.addEventListener('message', e => {
+    if (e.data?.type === 'theme') document.documentElement.dataset.theme = e.data.value;
+    if (e.data?.type === 'accent') document.documentElement.dataset.accent = e.data.value;
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-accent="indigo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Match AI v7 · Stage 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<style>
+  body { display: flex; min-height: 100vh; background: var(--bg-app); }
+
+  /* Sidebar */
+  .sidebar {
+    width: 280px; flex-shrink: 0;
+    padding: var(--sp-5);
+    border-right: 1px solid var(--border);
+    background: var(--bg-elev);
+    display: flex; flex-direction: column; gap: var(--sp-4);
+  }
+  .brand-row { display: flex; align-items: center; gap: var(--sp-3); padding-bottom: var(--sp-4); border-bottom: 1px solid var(--border); }
+  .brand-mark-mini {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .brand-mark-mini svg { width: 20px; height: 20px; color: #fff; }
+  .brand-text { display: flex; flex-direction: column; }
+  .brand-text strong { font-size: var(--fs-md); font-weight: 700; letter-spacing: -0.02em; color: var(--fg); }
+  .brand-text small { font-size: var(--fs-xs); color: var(--fg-mute); margin-top: 2px; }
+
+  .group-label {
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--fg-faint); padding: var(--sp-3) var(--sp-2) var(--sp-2);
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: var(--sp-3);
+    padding: 10px var(--sp-3);
+    border-radius: var(--r-md);
+    cursor: pointer; user-select: none;
+    transition: all var(--d-1) var(--ease);
+    color: var(--fg);
+    font-size: var(--fs-sm); font-weight: 500;
+  }
+  .nav-item:hover { background: var(--accent-soft); color: var(--accent); }
+  .nav-item.active { background: var(--accent); color: #fff; }
+  .nav-num {
+    width: 22px; height: 22px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg-app); color: var(--fg-mute);
+    font-size: 11px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .nav-item.active .nav-num { background: rgba(255,255,255,0.2); color: #fff; }
+
+  .controls { margin-top: auto; padding-top: var(--sp-4); border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: var(--sp-3); }
+  .ctl-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-faint); }
+  .seg {
+    display: flex; gap: 2px; padding: 3px;
+    background: var(--bg-app); border-radius: var(--r-sm);
+  }
+  .seg button {
+    flex: 1; padding: 6px 8px;
+    font-size: var(--fs-xs); font-weight: 600;
+    color: var(--fg-mute);
+    border-radius: 6px;
+    transition: all var(--d-1) var(--ease);
+  }
+  .seg button.on { background: var(--bg-elev); color: var(--fg); box-shadow: var(--shadow-1); }
+
+  .swatches { display: flex; gap: 6px; }
+  .sw {
+    width: 24px; height: 24px; border-radius: 8px;
+    cursor: pointer; transition: transform var(--d-1) var(--ease);
+    border: 2px solid transparent;
+  }
+  .sw:hover { transform: scale(1.1); }
+  .sw.on { border-color: var(--fg); }
+  .sw[data-c="indigo"] { background: #6366F1; }
+  .sw[data-c="violet"] { background: #8B5CF6; }
+  .sw[data-c="cyan"]   { background: #06B6D4; }
+  .sw[data-c="amber"]  { background: #F59E0B; }
+  .sw[data-c="mint"]   { background: #10B981; }
+
+  /* Main */
+  .main {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: var(--sp-5);
+    overflow: auto;
+  }
+  iframe {
+    border: none;
+    width: 375px; height: 812px;
+    border-radius: 40px;
+    box-shadow: var(--shadow-2);
+    background: var(--bg-app);
+  }
+
+  .stage-pill {
+    margin-top: var(--sp-3); padding: 8px 12px;
+    background: var(--accent-soft); color: var(--accent);
+    font-size: var(--fs-xs); font-weight: 600;
+    border-radius: var(--r-pill); display: inline-block;
+    align-self: flex-start;
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand-row">
+    <div class="brand-mark-mini">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/>
+      </svg>
+    </div>
+    <div class="brand-text">
+      <strong>Match AI</strong>
+      <small>v7 · 阶段 1</small>
+    </div>
+  </div>
+
+  <span class="stage-pill">本阶段：场景匹配（启动 + 基础信息）</span>
+
+  <div>
+    <div class="group-label">已完成</div>
+    <div class="nav-item active" data-page="01_启动页.html">
+      <span class="nav-num">1</span><span>启动页</span>
+    </div>
+    <div class="nav-item" data-page="02_基础信息.html">
+      <span class="nav-num">2</span><span>基础信息（性别 + 城市）</span>
+    </div>
+  </div>
+
+  <div>
+    <div class="group-label">阶段 2 待做</div>
+    <div class="nav-item" style="opacity:0.5; cursor:not-allowed">
+      <span class="nav-num">3</span><span>首页（场景列表）</span>
+    </div>
+    <div class="nav-item" style="opacity:0.5; cursor:not-allowed">
+      <span class="nav-num">4</span><span>合拍搭子激活</span>
+    </div>
+    <div class="nav-item" style="opacity:0.5; cursor:not-allowed">
+      <span class="nav-num">5</span><span>匹配结果 + 复制微信</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div>
+      <div class="ctl-label">主题</div>
+      <div class="seg" id="theme-seg">
+        <button class="on" data-t="light">浅色</button>
+        <button data-t="dark">暗色</button>
+      </div>
+    </div>
+    <div>
+      <div class="ctl-label">主色</div>
+      <div class="swatches" id="acc">
+        <div class="sw on" data-c="indigo"></div>
+        <div class="sw" data-c="violet"></div>
+        <div class="sw" data-c="cyan"></div>
+        <div class="sw" data-c="amber"></div>
+        <div class="sw" data-c="mint"></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <iframe id="frame" src="pages/01_启动页.html" title="预览"></iframe>
+</main>
+
+<script>
+  const frame = document.getElementById('frame');
+
+  // sidebar nav
+  document.querySelectorAll('.nav-item[data-page]').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+      el.classList.add('active');
+      frame.src = 'pages/' + el.dataset.page;
+    });
+  });
+
+  // listen iframe nav
+  window.addEventListener('message', e => {
+    if (e.data?.type === 'nav') {
+      const target = e.data.page;
+      frame.src = 'pages/' + target;
+      document.querySelectorAll('.nav-item').forEach(x => {
+        x.classList.toggle('active', x.dataset.page === target);
+      });
+    }
+  });
+
+  // theme
+  document.querySelectorAll('#theme-seg button').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('#theme-seg button').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+      const v = b.dataset.t;
+      document.documentElement.dataset.theme = v;
+      // also tell iframe
+      frame.contentDocument && (frame.contentDocument.documentElement.dataset.theme = v);
+      frame.contentWindow.postMessage({ type: 'theme', value: v }, '*');
+    });
+  });
+
+  // accent
+  document.querySelectorAll('.sw').forEach(s => {
+    s.addEventListener('click', () => {
+      document.querySelectorAll('.sw').forEach(x => x.classList.remove('on'));
+      s.classList.add('on');
+      const v = s.dataset.c;
+      document.documentElement.dataset.accent = v;
+      frame.contentDocument && (frame.contentDocument.documentElement.dataset.accent = v);
+      frame.contentWindow.postMessage({ type: 'accent', value: v }, '*');
+    });
+  });
+
+  // re-apply theme/accent when iframe loads new page
+  frame.addEventListener('load', () => {
+    const t = document.documentElement.dataset.theme;
+    const a = document.documentElement.dataset.accent;
+    frame.contentWindow.postMessage({ type: 'theme', value: t }, '*');
+    frame.contentWindow.postMessage({ type: 'accent', value: a }, '*');
+  });
+</script>
+</body>
+</html>

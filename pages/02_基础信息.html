@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-accent="indigo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Match AI · 基础信息</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .topbar {
+    height: 48px; padding: 0 var(--sp-3); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar .back {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--fg);
+    transition: background var(--d-1) var(--ease);
+  }
+  .topbar .back:hover { background: var(--accent-soft); }
+  .topbar .back svg { width: 18px; height: 18px; }
+  .topbar .step { font-size: var(--fs-xs); color: var(--fg-faint); font-weight: 500; }
+
+  .body {
+    flex: 1; padding: 24px var(--sp-5) var(--sp-5);
+    display: flex; flex-direction: column; gap: var(--sp-6);
+  }
+
+  .header h1 {
+    font-size: 28px; font-weight: 700; letter-spacing: -0.03em;
+    color: var(--fg); line-height: 1.25;
+  }
+  .header p {
+    margin-top: var(--sp-2);
+    font-size: var(--fs-md); color: var(--fg-mute);
+    line-height: 1.6;
+  }
+
+  .field { display: flex; flex-direction: column; gap: var(--sp-3); }
+  .field-label {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: var(--fs-sm); font-weight: 600;
+    color: var(--fg);
+  }
+  .field-label .req { color: var(--accent); font-size: var(--fs-xs); font-weight: 600; }
+
+  /* Gender */
+  .gender-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3);
+  }
+  .gender-opt {
+    padding: 18px var(--sp-3); border-radius: var(--r-md);
+    border: 1.5px solid var(--border);
+    background: var(--bg-elev);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    cursor: pointer; user-select: none;
+    transition: all var(--d-1) var(--ease);
+  }
+  .gender-opt:hover { border-color: var(--border-strong); }
+  .gender-opt.active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .gender-opt svg { width: 22px; height: 22px; color: var(--fg-mute); transition: color var(--d-1) var(--ease); }
+  .gender-opt.active svg { color: var(--accent); }
+  .gender-opt span { font-size: var(--fs-md); font-weight: 600; color: var(--fg); letter-spacing: -0.01em; }
+
+  /* City */
+  .city-input-wrap {
+    display: flex; align-items: center; gap: var(--sp-3);
+    padding: 14px var(--sp-4);
+    background: var(--bg-elev);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-md);
+    transition: border-color var(--d-1) var(--ease);
+    cursor: pointer;
+  }
+  .city-input-wrap:hover { border-color: var(--border-strong); }
+  .city-input-wrap.has-value { border-color: var(--accent); background: var(--accent-soft); }
+  .city-input-wrap svg { width: 18px; height: 18px; color: var(--fg-mute); flex-shrink: 0; }
+  .city-input-wrap.has-value svg { color: var(--accent); }
+  .city-text { flex: 1; font-size: var(--fs-md); color: var(--fg); font-weight: 500; }
+  .city-text.placeholder { color: var(--fg-faint); font-weight: 400; }
+  .city-chevron { color: var(--fg-faint); }
+
+  .quick-cities {
+    display: flex; flex-wrap: wrap; gap: var(--sp-2);
+    margin-top: var(--sp-3);
+  }
+  .quick-city {
+    padding: 8px 14px; border-radius: var(--r-pill);
+    background: var(--bg-elev); border: 1px solid var(--border);
+    font-size: var(--fs-sm); color: var(--fg); font-weight: 500;
+    cursor: pointer; transition: all var(--d-1) var(--ease);
+  }
+  .quick-city:hover { border-color: var(--accent); color: var(--accent); }
+  .quick-city.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .quick-label { font-size: var(--fs-xs); color: var(--fg-faint); margin-bottom: var(--sp-2); }
+
+  .footer {
+    margin-top: auto; padding: var(--sp-5) var(--sp-5) var(--sp-5);
+    background: var(--bg-app);
+  }
+  .privacy-note {
+    text-align: center; margin-top: var(--sp-3);
+    font-size: var(--fs-xs); color: var(--fg-faint);
+  }
+
+  /* Bottom sheet for city picker */
+  .sheet-mask {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.4);
+    opacity: 0; pointer-events: none;
+    transition: opacity var(--d-1) var(--ease);
+    z-index: 10;
+  }
+  .sheet-mask.open { opacity: 1; pointer-events: auto; }
+  .sheet {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: var(--bg-elev);
+    border-radius: 24px 24px 0 0;
+    padding: var(--sp-5);
+    transform: translateY(100%);
+    transition: transform var(--d-2) var(--ease);
+    z-index: 11;
+    max-height: 70%;
+    overflow-y: auto;
+  }
+  .sheet.open { transform: translateY(0); }
+  .sheet h3 { font-size: var(--fs-lg); font-weight: 700; letter-spacing: -0.02em; margin-bottom: var(--sp-4); }
+  .sheet input {
+    width: 100%; padding: 12px var(--sp-4);
+    background: var(--bg-app); border: 1.5px solid var(--border);
+    border-radius: var(--r-md);
+    font-family: inherit; font-size: var(--fs-md); color: var(--fg);
+    margin-bottom: var(--sp-4);
+  }
+  .sheet input:focus { outline: none; border-color: var(--accent); }
+  .sheet-list { display: flex; flex-direction: column; gap: 2px; }
+  .sheet-item {
+    padding: 14px var(--sp-3); border-radius: var(--r-sm);
+    font-size: var(--fs-md); color: var(--fg); cursor: pointer;
+    transition: background var(--d-1) var(--ease);
+  }
+  .sheet-item:hover { background: var(--accent-soft); }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="statusbar">
+    <span>9:41</span>
+    <span class="icons">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6c5-3 15-3 20 0"/><path d="M5 10c4-2 10-2 14 0"/><path d="M8 14c2-1 6-1 8 0"/><circle cx="12" cy="18" r="1.2" fill="currentColor"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="18" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg>
+    </span>
+  </div>
+
+  <div class="topbar">
+    <button class="back" data-nav="01_启动页.html" aria-label="返回">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="step">1 / 1</span>
+    <span style="width:36px"></span>
+  </div>
+
+  <div class="body">
+    <div class="header">
+      <h1>先认识一下你</h1>
+      <p>这两个信息会用来给你匹配同城合拍的人。</p>
+    </div>
+
+    <!-- 性别 -->
+    <div class="field">
+      <div class="field-label">
+        <span>性别</span>
+        <span class="req">必选</span>
+      </div>
+      <div class="gender-row" id="gender">
+        <div class="gender-opt" data-val="male">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="10" cy="14" r="5"/><line x1="19" y1="5" x2="13.6" y2="10.4"/><polyline points="14 5 19 5 19 10"/>
+          </svg>
+          <span>男</span>
+        </div>
+        <div class="gender-opt" data-val="female">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="9" r="5"/><line x1="12" y1="14" x2="12" y2="22"/><line x1="8" y1="18" x2="16" y2="18"/>
+          </svg>
+          <span>女</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 城市 -->
+    <div class="field">
+      <div class="field-label">
+        <span>所在城市</span>
+        <span class="req">必选</span>
+      </div>
+      <div class="city-input-wrap" id="city-trigger">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s-7-7.58-7-13a7 7 0 0 1 14 0c0 5.42-7 13-7 13z"/><circle cx="12" cy="9" r="2.5"/>
+        </svg>
+        <span class="city-text placeholder" id="city-text">使用当前位置 或 手动选择</span>
+        <svg class="city-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+
+      <div class="quick-label">热门</div>
+      <div class="quick-cities" id="quick">
+        <button class="quick-city" data-city="北京">北京</button>
+        <button class="quick-city" data-city="上海">上海</button>
+        <button class="quick-city" data-city="杭州">杭州</button>
+        <button class="quick-city" data-city="广州">广州</button>
+        <button class="quick-city" data-city="深圳">深圳</button>
+        <button class="quick-city" data-city="成都">成都</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <button class="btn-primary" id="submit" disabled>完成 · 进入首页</button>
+    <p class="privacy-note">仅用于匹配，可在「我的」中随时修改</p>
+  </div>
+
+  <!-- City picker sheet -->
+  <div class="sheet-mask" id="mask"></div>
+  <div class="sheet" id="sheet">
+    <h3>选择城市</h3>
+    <input type="text" placeholder="搜索城市，如「杭州」" id="search" />
+    <div class="sheet-list" id="search-list">
+      <div class="sheet-item" data-city="北京">北京</div>
+      <div class="sheet-item" data-city="上海">上海</div>
+      <div class="sheet-item" data-city="广州">广州</div>
+      <div class="sheet-item" data-city="深圳">深圳</div>
+      <div class="sheet-item" data-city="杭州">杭州</div>
+      <div class="sheet-item" data-city="成都">成都</div>
+      <div class="sheet-item" data-city="南京">南京</div>
+      <div class="sheet-item" data-city="武汉">武汉</div>
+      <div class="sheet-item" data-city="西安">西安</div>
+      <div class="sheet-item" data-city="重庆">重庆</div>
+      <div class="sheet-item" data-city="苏州">苏州</div>
+      <div class="sheet-item" data-city="天津">天津</div>
+      <div class="sheet-item" data-city="长沙">长沙</div>
+      <div class="sheet-item" data-city="郑州">郑州</div>
+      <div class="sheet-item" data-city="青岛">青岛</div>
+      <div class="sheet-item" data-city="厦门">厦门</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const state = { gender: null, city: null };
+
+  // Gender selection
+  document.querySelectorAll('.gender-opt').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.gender-opt').forEach(x => x.classList.remove('active'));
+      el.classList.add('active');
+      state.gender = el.dataset.val;
+      checkSubmit();
+    });
+  });
+
+  // Quick city
+  document.querySelectorAll('.quick-city').forEach(el => {
+    el.addEventListener('click', () => setCity(el.dataset.city));
+  });
+
+  // Open sheet
+  document.getElementById('city-trigger').addEventListener('click', () => {
+    document.getElementById('mask').classList.add('open');
+    document.getElementById('sheet').classList.add('open');
+  });
+  document.getElementById('mask').addEventListener('click', closeSheet);
+
+  // Search filter
+  document.getElementById('search').addEventListener('input', e => {
+    const q = e.target.value.trim();
+    document.querySelectorAll('.sheet-item').forEach(item => {
+      item.style.display = (!q || item.dataset.city.includes(q)) ? '' : 'none';
+    });
+  });
+
+  // Sheet item select
+  document.querySelectorAll('.sheet-item').forEach(item => {
+    item.addEventListener('click', () => {
+      setCity(item.dataset.city);
+      closeSheet();
+    });
+  });
+
+  function setCity(name) {
+    state.city = name;
+    const el = document.getElementById('city-text');
+    el.textContent = name;
+    el.classList.remove('placeholder');
+    document.getElementById('city-trigger').classList.add('has-value');
+    document.querySelectorAll('.quick-city').forEach(c => {
+      c.classList.toggle('active', c.dataset.city === name);
+    });
+    checkSubmit();
+  }
+
+  function closeSheet() {
+    document.getElementById('mask').classList.remove('open');
+    document.getElementById('sheet').classList.remove('open');
+  }
+
+  function checkSubmit() {
+    document.getElementById('submit').disabled = !(state.gender && state.city);
+  }
+
+  // Submit (no next page yet — show toast)
+  document.getElementById('submit').addEventListener('click', () => {
+    if (!state.gender || !state.city) return;
+    alert('已保存：' + (state.gender === 'male' ? '男' : '女') + ' · ' + state.city + '\n（首页待 v7-阶段2 实现）');
+  });
+
+  // Back nav
+  document.querySelectorAll('[data-nav]').forEach(el => {
+    el.addEventListener('click', () => {
+      const target = el.dataset.nav;
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'nav', page: target }, '*');
+      } else {
+        location.href = target;
+      }
+    });
+  });
+
+  // Theme sync from parent
+  window.addEventListener('message', e => {
+    if (e.data?.type === 'theme') document.documentElement.dataset.theme = e.data.value;
+    if (e.data?.type === 'accent') document.documentElement.dataset.accent = e.data.value;
+  });
+</script>
+</body>
+</html>
