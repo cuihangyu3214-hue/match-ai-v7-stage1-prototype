@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-accent="indigo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Match AI · 匹配结果</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .topbar {
+    height: 48px; padding: 0 12px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar .back {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--fg);
+  }
+  .topbar .back svg { width: 18px; height: 18px; }
+  .topbar h2 {
+    font-size: 16px; font-weight: 600; color: var(--fg);
+  }
+
+  .scroll {
+    flex: 1; overflow-y: auto;
+    padding: 8px 24px 24px;
+    scrollbar-width: none;
+  }
+  .scroll::-webkit-scrollbar { display: none; }
+
+  .header {
+    padding-bottom: 16px;
+  }
+  .header h1 {
+    font-size: 22px; font-weight: 700; letter-spacing: -0.02em;
+    color: var(--fg);
+  }
+  .header p {
+    margin-top: 4px;
+    font-size: 13px; color: var(--fg-mute);
+  }
+
+  /* 匹配卡 */
+  .card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: all var(--d-1) var(--ease);
+  }
+  .card:hover { border-color: var(--border-strong); }
+  .card.hot {
+    border: 1.5px solid var(--accent);
+    background: linear-gradient(180deg, var(--accent-soft) 0%, var(--bg-elev) 60%);
+  }
+
+  .card-top {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 12px;
+  }
+  .avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 16px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .name-row { flex: 1; min-width: 0; }
+  .name { font-size: 15px; font-weight: 600; color: var(--fg); }
+  .meta { font-size: 12px; color: var(--fg-mute); margin-top: 2px; }
+  .pct {
+    font-size: 14px; font-weight: 700; color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .quote {
+    background: var(--accent-soft);
+    border-left: 2.5px solid var(--accent);
+    padding: 10px 14px;
+    border-radius: 0 var(--r-sm) var(--r-sm) 0;
+    font-size: 13px; color: var(--fg);
+    line-height: 1.55;
+    margin-bottom: 12px;
+  }
+  .quote-from {
+    font-size: 11px; color: var(--accent);
+    font-weight: 600; margin-bottom: 4px;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+
+  .common-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 12px;
+  }
+  .ctag {
+    font-size: 11px; padding: 3px 8px;
+    background: var(--bg-app);
+    border: 1px solid var(--border);
+    border-radius: var(--r-pill);
+    color: var(--fg-mute);
+  }
+  .ctag.match {
+    background: var(--accent-soft); color: var(--accent);
+    border-color: transparent; font-weight: 600;
+  }
+
+  .copy-btn {
+    width: 100%; padding: 12px;
+    background: var(--accent); color: white;
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    border: none; border-radius: var(--r-md);
+    cursor: pointer;
+    transition: background var(--d-1) var(--ease);
+  }
+  .copy-btn:hover { background: var(--accent-hover); }
+  .copy-btn:active { transform: scale(0.99); }
+  .copy-btn.done { background: #10B981; }
+  .copy-btn svg { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; }
+
+  /* Toast */
+  .toast {
+    position: absolute; top: 56px; left: 50%; transform: translate(-50%, -20px);
+    padding: 12px 18px;
+    background: var(--fg); color: var(--bg-elev);
+    border-radius: var(--r-md);
+    font-size: 13px; font-weight: 500;
+    box-shadow: var(--shadow-2);
+    opacity: 0; pointer-events: none;
+    transition: all var(--d-2) var(--ease);
+    z-index: 50;
+    display: flex; align-items: center; gap: 8px;
+    white-space: nowrap;
+  }
+  .toast svg { width: 16px; height: 16px; color: #10B981; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="statusbar">
+    <span>9:41</span>
+    <span class="icons">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6c5-3 15-3 20 0"/><path d="M5 10c4-2 10-2 14 0"/><path d="M8 14c2-1 6-1 8 0"/><circle cx="12" cy="18" r="1.2" fill="currentColor"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="18" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg>
+    </span>
+  </div>
+
+  <div class="topbar">
+    <button class="back" data-back aria-label="返回">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <h2>合拍搭子</h2>
+    <span style="width:36px"></span>
+  </div>
+
+  <div class="scroll">
+    <div class="header">
+      <h1>今日匹配</h1>
+      <p>3 个合拍搭子，复制 TA 微信号去打个招呼吧</p>
+    </div>
+
+    <!-- 高合拍 -->
+    <div class="card hot">
+      <div class="card-top">
+        <div class="avatar">林</div>
+        <div class="name-row">
+          <div class="name">林夕</div>
+          <div class="meta">女 · 23 岁 · 杭州</div>
+        </div>
+        <div class="pct">92%</div>
+      </div>
+      <div class="quote">
+        <div class="quote-from">AI · 来自你的分身</div>
+        你们都喜欢徒步、电影和咖啡。林夕周末常去万象城那家独立咖啡，你也可以约一起。
+      </div>
+      <div class="common-tags">
+        <span class="ctag match">徒步</span>
+        <span class="ctag match">电影</span>
+        <span class="ctag match">咖啡</span>
+        <span class="ctag">杭州</span>
+      </div>
+      <button class="copy-btn" data-wx="linxi_2026" data-name="林夕">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        复制 TA 的微信号
+      </button>
+    </div>
+
+    <!-- 普通 1 -->
+    <div class="card">
+      <div class="card-top">
+        <div class="avatar">M</div>
+        <div class="name-row">
+          <div class="name">Miya</div>
+          <div class="meta">女 · 25 岁 · 杭州</div>
+        </div>
+        <div class="pct">76%</div>
+      </div>
+      <div class="quote">
+        <div class="quote-from">AI · 来自你的分身</div>
+        Miya 也喜欢摄影和读书，可以聊聊最近在追的剧。
+      </div>
+      <div class="common-tags">
+        <span class="ctag match">摄影</span>
+        <span class="ctag match">读书</span>
+        <span class="ctag">杭州</span>
+      </div>
+      <button class="copy-btn" data-wx="miya_photo" data-name="Miya">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        复制 TA 的微信号
+      </button>
+    </div>
+
+    <!-- 普通 2 -->
+    <div class="card">
+      <div class="card-top">
+        <div class="avatar">K</div>
+        <div class="name-row">
+          <div class="name">Kayla</div>
+          <div class="meta">女 · 24 岁 · 杭州</div>
+        </div>
+        <div class="pct">71%</div>
+      </div>
+      <div class="quote">
+        <div class="quote-from">AI · 来自你的分身</div>
+        Kayla 是脱口秀爱好者，也常去 livehouse。
+      </div>
+      <div class="common-tags">
+        <span class="ctag match">脱口秀</span>
+        <span class="ctag match">音乐节</span>
+        <span class="ctag">杭州</span>
+      </div>
+      <button class="copy-btn" data-wx="kayla_lh" data-name="Kayla">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        复制 TA 的微信号
+      </button>
+    </div>
+
+    <p style="text-align:center;font-size:12px;color:var(--fg-faint);margin-top:24px;">
+      明天还有 1 次新匹配 · 晚安
+    </p>
+  </div>
+
+  <div class="toast" id="toast">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="toast-text">已复制</span>
+  </div>
+</div>
+
+<script>
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-text').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const wx = btn.dataset.wx;
+      const name = btn.dataset.name;
+      // 真复制
+      navigator.clipboard?.writeText(wx).catch(() => {});
+      // 视觉反馈
+      btn.classList.add('done');
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 已复制 ' + wx;
+      showToast('已复制 ' + name + ' 的微信号 · 去微信加 TA');
+    });
+  });
+
+  document.querySelector('[data-back]').addEventListener('click', () => {
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'nav', page: '03_首页.html' }, '*');
+    } else {
+      location.href = '03_首页.html';
+    }
+  });
+
+  window.addEventListener('message', e => {
+    if (e.data?.type === 'theme') document.documentElement.dataset.theme = e.data.value;
+    if (e.data?.type === 'accent') document.documentElement.dataset.accent = e.data.value;
+  });
+</script>
+</body>
+</html>

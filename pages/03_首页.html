@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-accent="indigo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Match AI · 首页</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../theme.css">
+<style>
+  /* layout: 状态栏 + 内容滚动区 + 吸底 tab */
+  .page { display: flex; flex-direction: column; }
+
+  /* 内容滚动区 */
+  .scroll {
+    flex: 1; overflow-y: auto;
+    padding: 8px 24px 24px;
+    scrollbar-width: none;
+  }
+  .scroll::-webkit-scrollbar { display: none; }
+
+  /* 顶部问候 */
+  .greet {
+    padding: 8px 0 20px;
+  }
+  .greet h1 {
+    font-size: 24px; font-weight: 700; letter-spacing: -0.02em;
+    color: var(--fg);
+  }
+  .greet p {
+    margin-top: 4px;
+    font-size: 13px; color: var(--fg-mute);
+  }
+  .greet .city-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    margin-top: 8px;
+    padding: 4px 10px; border-radius: var(--r-pill);
+    background: var(--accent-soft); color: var(--accent);
+    font-size: 12px; font-weight: 500;
+  }
+  .greet .city-tag svg { width: 12px; height: 12px; }
+
+  .section-h {
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--fg-faint);
+    margin: 16px 0 12px;
+  }
+
+  /* 场景卡 */
+  .scene {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: all var(--d-1) var(--ease);
+  }
+  .scene:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+  .scene:active { transform: scale(0.99); }
+
+  .scene-ico {
+    width: 44px; height: 44px;
+    border-radius: var(--r-md);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .scene-ico svg { width: 22px; height: 22px; }
+
+  .scene-body { flex: 1; min-width: 0; }
+  .scene-title {
+    font-size: 15px; font-weight: 600;
+    color: var(--fg); letter-spacing: -0.01em;
+  }
+  .scene-meta {
+    font-size: 12px; color: var(--fg-mute);
+    margin-top: 2px;
+  }
+
+  .scene-arr {
+    width: 20px; height: 20px;
+    color: var(--fg-faint);
+    flex-shrink: 0;
+  }
+  .scene-badge {
+    font-size: 10px; font-weight: 600;
+    padding: 2px 8px; border-radius: var(--r-pill);
+    background: var(--accent); color: white;
+    margin-left: auto; flex-shrink: 0;
+  }
+
+  /* 未激活状态 */
+  .scene.dim { opacity: 0.55; }
+  .scene.dim .scene-ico { background: var(--border); color: var(--fg-mute); }
+  .scene.dim .scene-meta { color: var(--fg-faint); }
+  .dim-tag {
+    font-size: 11px; color: var(--fg-faint); font-weight: 500;
+  }
+
+  /* 高亮 ready */
+  .scene.ready {
+    border: 1.5px solid var(--accent);
+    background: linear-gradient(180deg, var(--accent-soft) 0%, var(--bg-elev) 60%);
+  }
+
+  /* 吸底 Tab Bar */
+  .tab-bar {
+    flex-shrink: 0;
+    display: flex; align-items: stretch;
+    background: var(--bg-elev);
+    border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .tab {
+    flex: 1; padding: 10px 0 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    color: var(--fg-faint);
+    cursor: pointer;
+    transition: color var(--d-1) var(--ease);
+  }
+  .tab:hover { color: var(--accent); }
+  .tab.active { color: var(--accent); }
+  .tab svg { width: 22px; height: 22px; stroke-width: 2; }
+  .tab span { font-size: 10px; font-weight: 500; letter-spacing: 0.02em; }
+
+  /* 通知 */
+  .toast {
+    position: absolute; top: 60px; left: 24px; right: 24px;
+    padding: 12px 16px;
+    background: var(--fg); color: var(--bg-elev);
+    border-radius: var(--r-md);
+    font-size: 13px; font-weight: 500;
+    text-align: center;
+    box-shadow: var(--shadow-2);
+    transform: translateY(-20px); opacity: 0; pointer-events: none;
+    transition: all var(--d-2) var(--ease);
+    z-index: 50;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="statusbar">
+    <span>9:41</span>
+    <span class="icons">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6c5-3 15-3 20 0"/><path d="M5 10c4-2 10-2 14 0"/><path d="M8 14c2-1 6-1 8 0"/><circle cx="12" cy="18" r="1.2" fill="currentColor"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="18" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg>
+    </span>
+  </div>
+
+  <div class="scroll">
+    <div class="greet">
+      <h1>下午好</h1>
+      <p>选一个场景，开始认识合拍的人</p>
+      <span class="city-tag">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s-7-7.58-7-13a7 7 0 0 1 14 0c0 5.42-7 13-7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        <span id="city">杭州</span>
+      </span>
+    </div>
+
+    <div class="section-h">5 个场景</div>
+
+    <!-- 合拍搭子（一期可用）-->
+    <div class="scene ready" data-scene="buddy">
+      <div class="scene-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="17" cy="11" r="3"/><path d="M21 21v-1.5a3 3 0 0 0-3-3h-1.5"/></svg>
+      </div>
+      <div class="scene-body">
+        <div class="scene-title">合拍搭子</div>
+        <div class="scene-meta">基于兴趣 · 每天 1 次匹配</div>
+      </div>
+      <span class="scene-badge">立即开始</span>
+    </div>
+
+    <!-- 其余 4 个未激活 -->
+    <div class="scene dim" data-scene="lover">
+      <div class="scene-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+      <div class="scene-body">
+        <div class="scene-title">合拍伴侣</div>
+        <div class="scene-meta">综合标签 · 每周四 20:00 公布</div>
+      </div>
+      <span class="dim-tag">暂未开放</span>
+    </div>
+
+    <div class="scene dim" data-scene="job">
+      <div class="scene-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      </div>
+      <div class="scene-body">
+        <div class="scene-title">实习求职</div>
+        <div class="scene-meta">同行/校友内推 · 每周 1 次</div>
+      </div>
+      <span class="dim-tag">暂未开放</span>
+    </div>
+
+    <div class="scene dim" data-scene="skill">
+      <div class="scene-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      </div>
+      <div class="scene-body">
+        <div class="scene-title">技能交换</div>
+        <div class="scene-meta">你会的 ↔ 你想学的 · 每 3 天 1 次</div>
+      </div>
+      <span class="dim-tag">暂未开放</span>
+    </div>
+
+    <div class="scene dim" data-scene="barter">
+      <div class="scene-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/></svg>
+      </div>
+      <div class="scene-body">
+        <div class="scene-title">易物</div>
+        <div class="scene-meta">闲置物品盲盒交换 · 每周 1 次</div>
+      </div>
+      <span class="dim-tag">暂未开放</span>
+    </div>
+  </div>
+
+  <!-- 吸底 Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      <span>首页</span>
+    </div>
+    <div class="tab" onclick="showToast('圈子 Tab 待阶段 3 实现')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
+      <span>圈子</span>
+    </div>
+    <div class="tab" onclick="showToast('我的 Tab 待阶段 3 实现')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+      <span>我的</span>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  function goPage(target) {
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'nav', page: target }, '*');
+    } else {
+      location.href = target;
+    }
+  }
+
+  // 场景卡点击
+  document.querySelectorAll('.scene').forEach(el => {
+    el.addEventListener('click', () => {
+      const scene = el.dataset.scene;
+      if (scene !== 'buddy') {
+        showToast('该场景暂未开放，敬请期待');
+        return;
+      }
+      // 检查微信号是否已填
+      const wx = localStorage.getItem('matchai_wechat');
+      if (wx) {
+        goPage('05_合拍搭子激活.html');
+      } else {
+        // 拦截：先填微信号，填完跳激活页
+        sessionStorage.setItem('matchai_after_wx', '05_合拍搭子激活.html');
+        goPage('04_微信号填写.html');
+      }
+    });
+  });
+
+  // 显示城市
+  const city = localStorage.getItem('matchai_city') || '杭州';
+  document.getElementById('city').textContent = city;
+
+  // 主题同步
+  window.addEventListener('message', e => {
+    if (e.data?.type === 'theme') document.documentElement.dataset.theme = e.data.value;
+    if (e.data?.type === 'accent') document.documentElement.dataset.accent = e.data.value;
+  });
+</script>
+</body>
+</html>
