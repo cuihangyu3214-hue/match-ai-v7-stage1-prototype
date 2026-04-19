@@ -230,11 +230,11 @@
 
     <div class="auth-form">
       <div>
-        <div class="field-label">学校</div>
-        <input class="field-input" id="auth-school" type="text" placeholder="如：浙江大学" autocomplete="off"/>
+        <div class="field-label">学校 <span style="color:var(--accent);font-weight:600;">必填</span></div>
+        <input class="field-input" id="auth-school" type="text" placeholder="如：浙江大学" value="浙江大学" autocomplete="off"/>
       </div>
       <div>
-        <div class="field-label">学生证 / 在校证明</div>
+        <div class="field-label">学生证 / 在校证明 <span style="color:var(--fg-faint);font-weight:400;">（选填，演示稿跳过）</span></div>
         <div class="photo-up">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           <span class="pri">添加照片</span>
@@ -244,7 +244,7 @@
     </div>
 
     <div class="auth-foot">
-      <button class="btn-primary" id="auth-submit" disabled>提交认证</button>
+      <button class="btn-primary" id="auth-submit">提交认证</button>
       <p style="text-align:center;font-size:11px;color:var(--fg-faint);margin-top:10px;">人工审核 · 通常 24h 内</p>
     </div>
   </div>
@@ -261,8 +261,8 @@
       <span>首页</span>
     </div>
     <div class="btab active">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
-      <span>圈子</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg>
+      <span>校园</span>
     </div>
     <div class="btab">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
@@ -324,8 +324,8 @@
     authSubmit.disabled = !authSchool.value.trim();
   });
   authSubmit.addEventListener('click', () => {
-    if (authSubmit.disabled) return;
-    localStorage.setItem('matchai_school', authSchool.value.trim());
+    const school = authSchool.value.trim() || '浙江大学';
+    localStorage.setItem('matchai_school', school);
     showCircle();
   });
 
