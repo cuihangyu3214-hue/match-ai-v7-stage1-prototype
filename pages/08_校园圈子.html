@@ -295,6 +295,9 @@
     game:  [{ id:'gm1',  initial:'赵', name:'赵杰',   meta:'男 · 紫金港', tags:['LOL','黄金'], quote:'TA 黄金段位 ADC，晚上 9-11 点常开。' }],
   };
 
+  // ===== 状态变量必须在 showCircle 调用前定义 =====
+  let currentScene = SCENES[0].k;
+
   // ===== 认证逻辑 =====
   // URL 参数 ?authed=1 → 强制视为已认证（演示用）
   // URL 参数 ?authed=0 → 强制视为未认证
@@ -338,8 +341,6 @@
   });
 
   // ===== Tab + 内容 =====
-  let currentScene = SCENES[0].k;
-
   function renderTabs() {
     const tabsEl = document.getElementById('tabs');
     tabsEl.innerHTML = SCENES.map((s, i) => {
