@@ -12,7 +12,7 @@
   .page { display: flex; flex-direction: column; }
   .topbar {
     height: 48px; padding: 0 12px; flex-shrink: 0;
-    display: flex; align-items: center;
+    display: flex; align-items: center; justify-content: space-between;
   }
   .topbar .back {
     width: 36px; height: 36px; border-radius: 50%;
@@ -178,6 +178,8 @@
     <button class="back" data-back aria-label="返回">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
+    <h2 id="topbar-title" style="font-size:16px;font-weight:600;color:var(--fg);letter-spacing:-0.01em;">TA 的资料</h2>
+    <span style="width:36px"></span>
   </div>
 
   <div class="scroll" id="scroll"></div>
