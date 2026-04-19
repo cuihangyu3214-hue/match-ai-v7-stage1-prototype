@@ -356,17 +356,17 @@
           <h2>填一下你的兴趣</h2>
           <p>选 3-5 个标签，匹配跟你合拍的搭子</p>
         </div>
-        <div class="wx-block" id="wx-block-buddy">
-          <div class="wx-label">微信号</div>
-          <input class="wx-input" id="wx-input-buddy" type="text" placeholder="你的微信号" autocomplete="off"/>
-          <div class="wx-hint">字母开头，6-20 位 · 一次填写所有场景通用</div>
-        </div>
         <div class="interest-block">
           <div class="progress-row">
             <span>已选 <span class="count" id="count">0</span> / 至少 3</span>
             <span id="hint">还差 3 个</span>
           </div>
           <div id="cats"></div>
+        </div>
+        <div class="wx-block" id="wx-block-buddy" style="margin-top:22px;">
+          <div class="wx-label">微信号</div>
+          <input class="wx-input" id="wx-input-buddy" type="text" placeholder="你的微信号" autocomplete="off"/>
+          <div class="wx-hint">字母开头，6-20 位 · 一次填写所有场景通用</div>
         </div>
         <div class="form-footer">
           <button class="btn-primary" id="submit" disabled>开始匹配</button>
@@ -564,14 +564,6 @@
         <div class="wx-block">
           <div class="wx-label">闲置介绍</div>
           <textarea class="wx-input" id="barter-desc" maxlength="30" placeholder="说明闲置物品 · 30 字"></textarea>
-        </div>
-        <div class="wx-block">
-          <div class="wx-label">想换什么</div>
-          <input class="wx-input" id="barter-want" type="text" placeholder="例：泡泡玛特盲盒"/>
-        </div>
-        <div class="wx-block">
-          <div class="wx-label">对换的人的期望（可选）</div>
-          <textarea class="wx-input" id="barter-wish" maxlength="30" placeholder="希望 TA 是什么样的人 · 30 字"></textarea>
         </div>
         <div class="wx-block">
           <div class="wx-label">闲置照片</div>
@@ -842,15 +834,14 @@
   if (existingWx) document.querySelector('.barter-wx').style.display = 'none';
   function barterCheck() {
     const desc = document.getElementById('barter-desc').value.trim();
-    const want = document.getElementById('barter-want').value.trim();
     const wxOk = existingWx || WX_RE.test(barterWxInput.value.trim());
-    barterSubmit.disabled = !(barterState.cat && desc && want && wxOk);
+    barterSubmit.disabled = !(barterState.cat && desc && wxOk);
   }
   document.querySelectorAll('#barter-cat .radio').forEach(r => r.addEventListener('click', () => {
     document.querySelectorAll('#barter-cat .radio').forEach(x => x.classList.remove('on'));
     r.classList.add('on'); barterState.cat = r.dataset.v; barterCheck();
   }));
-  ['barter-desc','barter-want'].forEach(id => document.getElementById(id).addEventListener('input', barterCheck));
+  ['barter-desc'].forEach(id => document.getElementById(id).addEventListener('input', barterCheck));
   barterWxInput.addEventListener('input', barterCheck);
   barterSubmit.addEventListener('click', () => { if (!barterSubmit.disabled) { if (!existingWx) localStorage.setItem('matchai_wechat', barterWxInput.value.trim()); triggerMatch('barter'); } });
 
