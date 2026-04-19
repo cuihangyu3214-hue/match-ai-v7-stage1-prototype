@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-accent="indigo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Match AI · 用户详情</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .page { display: flex; flex-direction: column; }
+  .topbar {
+    height: 48px; padding: 0 12px; flex-shrink: 0;
+    display: flex; align-items: center;
+  }
+  .topbar .back {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--fg);
+  }
+  .topbar .back svg { width: 18px; height: 18px; }
+
+  .scroll {
+    flex: 1; min-height: 0;
+    overflow-y: auto;
+    padding: 4px 24px 16px;
+    scrollbar-width: none;
+  }
+  .scroll::-webkit-scrollbar { display: none; }
+
+  .hero {
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center;
+    padding: 12px 0 18px;
+  }
+  .big-avatar {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 38px; font-weight: 600;
+    box-shadow: 0 8px 24px var(--accent-soft);
+  }
+  .hero-name {
+    margin-top: 14px;
+    font-size: 22px; font-weight: 700; letter-spacing: -0.02em;
+    color: var(--fg);
+  }
+  .hero-meta {
+    margin-top: 4px;
+    font-size: 13px; color: var(--fg-mute);
+  }
+  .pct-pill {
+    margin-top: 12px;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: var(--r-pill);
+    background: var(--accent-soft); color: var(--accent);
+    font-size: 13px; font-weight: 700;
+  }
+
+  .section { margin-top: 20px; }
+  .section-title {
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--fg-faint);
+    margin-bottom: 10px;
+  }
+
+  .common-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .ctag {
+    padding: 6px 12px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 13px; font-weight: 600;
+    border-radius: var(--r-pill);
+  }
+
+  .reason {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-left: 2.5px solid var(--accent);
+    padding: 12px 14px;
+    border-radius: 0 12px 12px 0;
+    font-size: 14px; color: var(--fg);
+    line-height: 1.6;
+  }
+  .reason-from {
+    margin-top: 8px;
+    font-size: 11px; color: var(--accent);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .wx-show {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+  .wx-show .wx {
+    font-family: 'Inter', monospace;
+    font-size: 15px; font-weight: 600;
+    color: var(--fg); letter-spacing: 0.02em;
+  }
+  .wx-show .wx-tag {
+    font-size: 11px; color: var(--fg-faint);
+  }
+
+  .footer {
+    flex-shrink: 0;
+    padding: 12px 22px 20px;
+    background: var(--bg-app);
+    border-top: 1px solid var(--border);
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+
+  .toast {
+    position: absolute; top: 56px; left: 50%; transform: translate(-50%, -20px);
+    padding: 12px 18px;
+    background: var(--fg); color: var(--bg-elev);
+    border-radius: var(--r-md);
+    font-size: 13px; font-weight: 500;
+    box-shadow: var(--shadow-2);
+    opacity: 0; pointer-events: none;
+    transition: all var(--d-2) var(--ease);
+    z-index: 50;
+    display: flex; align-items: center; gap: 8px;
+    white-space: nowrap;
+  }
+  .toast svg { width: 16px; height: 16px; color: #10B981; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="statusbar">
+    <span>9:41</span>
+    <span class="icons">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6c5-3 15-3 20 0"/><path d="M5 10c4-2 10-2 14 0"/><path d="M8 14c2-1 6-1 8 0"/><circle cx="12" cy="18" r="1.2" fill="currentColor"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="18" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg>
+    </span>
+  </div>
+
+  <div class="topbar">
+    <button class="back" data-back aria-label="返回">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+  </div>
+
+  <div class="scroll" id="scroll"></div>
+
+  <div class="footer">
+    <button class="btn-primary" id="copy-btn">复制 TA 微信号</button>
+  </div>
+
+  <div class="toast" id="toast">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="toast-text">已复制</span>
+  </div>
+</div>
+
+<script>
+  const users = {
+    linxi: {
+      initial: '林', name: '林夕', gender: '女', age: 23, city: '杭州',
+      pct: 92, wx: 'linxi_2026',
+      common: ['徒步','电影','咖啡'],
+      reason: '你们都喜欢徒步、电影和咖啡。林夕周末常去万象城那家独立咖啡，你也可以约一起。'
+    },
+    miya: {
+      initial: 'M', name: 'Miya', gender: '女', age: 25, city: '杭州',
+      pct: 76, wx: 'miya_photo',
+      common: ['摄影','读书','旅行'],
+      reason: 'Miya 也喜欢摄影和读书，最近在准备一个川西的拍摄计划，可以聊聊路线。'
+    },
+    kayla: {
+      initial: 'K', name: 'Kayla', gender: '女', age: 24, city: '杭州',
+      pct: 71, wx: 'kayla_lh',
+      common: ['脱口秀','音乐节'],
+      reason: 'Kayla 是脱口秀爱好者，也常去 livehouse，有共同的小众喜好。'
+    }
+  };
+
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id') || 'linxi';
+  const u = users[id] || users.linxi;
+
+  document.getElementById('scroll').innerHTML = `
+    <div class="hero">
+      <div class="big-avatar">${u.initial}</div>
+      <div class="hero-name">${u.name}</div>
+      <div class="hero-meta">${u.gender} · ${u.age} 岁 · ${u.city}</div>
+      <div class="pct-pill">合拍度 ${u.pct}%</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">共同点</div>
+      <div class="common-tags">
+        ${u.common.map(t => `<span class="ctag">${t}</span>`).join('')}
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">AI 推荐理由</div>
+      <div class="reason">
+        ${u.reason}
+        <div class="reason-from">— 来自你的分身</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">微信号</div>
+      <div class="wx-show">
+        <span class="wx">${u.wx}</span>
+        <span class="wx-tag">长按可选中</span>
+      </div>
+    </div>
+  `;
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-text').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  document.getElementById('copy-btn').addEventListener('click', () => {
+    navigator.clipboard?.writeText(u.wx).catch(() => {});
+    showToast('已复制 ' + u.name + ' 的微信号');
+  });
+
+  function goPage(target) {
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'nav', page: target }, '*');
+    } else {
+      location.href = target;
+    }
+  }
+  document.querySelector('[data-back]').addEventListener('click', () => goPage('06_匹配结果.html'));
+
+  window.addEventListener('message', e => {
+    if (e.data?.type === 'theme') document.documentElement.dataset.theme = e.data.value;
+    if (e.data?.type === 'accent') document.documentElement.dataset.accent = e.data.value;
+  });
+</script>
+</body>
+</html>
