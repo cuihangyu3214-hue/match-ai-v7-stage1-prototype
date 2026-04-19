@@ -142,6 +142,77 @@
     font-weight: 600;
   }
 
+  /* Pref question (single-select group) */
+  .pref-q {
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+  .pref-q-title {
+    font-size: 13px; font-weight: 500; color: var(--fg);
+    margin-bottom: 8px;
+  }
+  .pref-q-opts {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .pref-opt {
+    flex: 1; min-width: 60px;
+    padding: 8px 10px;
+    background: var(--bg-app);
+    border: 1.2px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px; color: var(--fg); font-weight: 500;
+    cursor: pointer; user-select: none; text-align: center;
+    transition: all var(--d-1) var(--ease);
+  }
+  .pref-opt:hover { border-color: var(--border-strong); }
+  .pref-opt.on {
+    background: var(--accent); color: white; border-color: var(--accent);
+  }
+
+  /* Chip insert */
+  .chip-insert {
+    display: inline-block; padding: 5px 12px;
+    background: var(--accent-soft); color: var(--accent);
+    border-radius: var(--r-pill);
+    font-size: 12px; font-weight: 500;
+    cursor: pointer; user-select: none;
+    transition: all var(--d-1) var(--ease);
+  }
+  .chip-insert:hover { background: var(--accent); color: white; }
+
+  /* Cycle wait state */
+  .cycle-wait {
+    text-align: center; padding: 60px 20px 40px;
+  }
+  .cycle-emoji {
+    font-size: 48px; margin-bottom: 16px;
+    opacity: 0.85;
+    animation: float 4s var(--ease) infinite;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .cycle-title {
+    font-size: 18px; font-weight: 600; color: var(--fg);
+    letter-spacing: -0.01em;
+  }
+  .cycle-sub {
+    font-size: 13px; color: var(--fg-mute); margin-top: 6px; line-height: 1.55;
+  }
+  .cycle-actions { margin-top: 26px; }
+  .cycle-btn-ghost {
+    padding: 8px 18px; font-size: 13px; font-weight: 500;
+    color: var(--accent); background: var(--accent-soft);
+    border: none; border-radius: var(--r-pill);
+    cursor: pointer;
+    transition: all var(--d-1) var(--ease);
+  }
+  .cycle-btn-ghost:hover { background: var(--accent); color: white; }
+
   /* Photo upload placeholder */
   .photo-up {
     display: flex; align-items: center; justify-content: center;
@@ -392,6 +463,7 @@
 
     <!-- ===== LOVER ===== -->
     <div id="pane-lover" class="pane">
+      <!-- A 没参加 -->
       <div class="state" id="lover-A">
         <div class="form-h">
           <h2>合拍伴侣</h2>
@@ -406,16 +478,33 @@
         </div>
         <div class="interest-block">
           <div class="progress-row">
-            <span>性格标签 <span class="count" id="count-lover">0</span> / 至少 3</span>
+            <span>你的性格 <span class="count" id="count-lover">0</span> / 至少 3</span>
             <span id="hint-lover">还差 3 个</span>
           </div>
           <div class="tags" id="tags-lover"></div>
         </div>
-        <div class="wx-block">
-          <div class="wx-label">期望的 TA</div>
-          <textarea class="wx-input" id="lover-wish" maxlength="60" placeholder="喜欢什么样的伴侣？"></textarea>
-          <div class="wx-hint">最多 60 字</div>
+
+        <!-- 6 道极速问答 -->
+        <div class="interest-block">
+          <div class="progress-row">
+            <span>你想匹配的 TA <span class="count" id="count-pref">0</span> / 6</span>
+            <span class="wx-hint" style="margin:0;">3 秒答完</span>
+          </div>
+          <div id="prefs"></div>
         </div>
+
+        <!-- 想说点别的（可选）-->
+        <div class="wx-block">
+          <div class="wx-label">想说点别的（可选）</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;" id="wish-chips">
+            <span class="chip-insert" data-t="三观一致">三观一致</span>
+            <span class="chip-insert" data-t="能聊得来">能聊得来</span>
+            <span class="chip-insert" data-t="稳定有趣">稳定有趣</span>
+            <span class="chip-insert" data-t="互相成长">互相成长</span>
+          </div>
+          <textarea class="wx-input" id="lover-wish" maxlength="60" placeholder="点上方 chip 或自己写..."></textarea>
+        </div>
+
         <div class="wx-block lover-wx">
           <div class="wx-label">微信号</div>
           <input class="wx-input" id="wx-input-lover" type="text" placeholder="你的微信号" autocomplete="off"/>
@@ -425,21 +514,30 @@
           <button class="btn-primary" id="submit-lover" disabled>开始匹配</button>
         </div>
       </div>
+
+      <!-- B 等待中（含两种子情况：本期未到 / 本期已结束）-->
       <div class="state" id="lover-B">
-        <div class="matching">
-          <div class="matching-orb"><div class="orb-dot"></div><div class="orb-dot"></div><div class="orb-dot"></div></div>
-          <h2 class="matching-title">分身正在为你寻找伴侣…</h2>
-          <p class="matching-sub">本周从 1240 位用户中筛选<br>周四 20:00 准时公布</p>
-          <div class="matching-bar"><div class="matching-bar-fill"></div></div>
+        <div class="cycle-wait">
+          <div class="cycle-emoji">💕</div>
+          <h2 class="cycle-title" id="cycle-title">下次匹配 周四 20:00</h2>
+          <p class="cycle-sub" id="cycle-sub">还有 3 天 · 你已在匹配池</p>
+          <div class="cycle-actions">
+            <button class="cycle-btn-ghost" id="lover-edit">调整资料</button>
+          </div>
         </div>
       </div>
+
+      <!-- C 本期结果 -->
       <div class="state" id="lover-C">
         <div class="res-h">
           <h2>本周伴侣</h2>
-          <span class="small">1 位 · 下周四 20:00 更新</span>
+          <span class="small" id="lover-c-meta">1 位 · 下周四 20:00 更新</span>
         </div>
         <div id="card-list-lover"></div>
         <p style="text-align:center;font-size:11px;color:var(--fg-faint);margin-top:14px;">深度匹配 · 一周一次 · 慢即是快</p>
+        <div style="text-align:center;margin-top:18px;">
+          <button class="cycle-btn-ghost" id="lover-edit-2">调整资料</button>
+        </div>
       </div>
     </div>
 
@@ -669,7 +767,7 @@
     if (chip) chip.classList.remove('has-new');
     if (st) {
       if (state === 'A') st.textContent = '没参加';
-      if (state === 'B') st.textContent = '匹配中';
+      if (state === 'B') st.textContent = scene === 'lover' ? '等待中' : '匹配中';
       if (state === 'C') {
         st.textContent = COUNT_LABEL[scene] || '有结果';
         chip.classList.add('has-new');
@@ -728,12 +826,53 @@
   const loverSubmit = document.getElementById('submit-lover');
   const loverWxInput = document.getElementById('wx-input-lover');
   if (existingWx) document.querySelector('.lover-wx').style.display = 'none';
+
+  // 6 道极速问答
+  const prefQuestions = [
+    { k: 'p1', q: 'TA 性格', opts: ['内向','外向','都行'] },
+    { k: 'p2', q: 'TA 周末', opts: ['出门型','居家型','都行'] },
+    { k: 'p3', q: 'TA 节奏', opts: ['慢热','直接','都行'] },
+    { k: 'p4', q: 'TA 聊天', opts: ['深聊','轻松','都行'] },
+    { k: 'p5', q: 'TA 年龄', opts: ['比我大','比我小','差不多'] },
+    { k: 'p6', q: 'TA 关注', opts: ['事业上进','生活情趣','平衡'] },
+  ];
+  const prefAnswers = {};
+  document.getElementById('prefs').innerHTML = prefQuestions.map(q => `
+    <div class="pref-q" data-k="${q.k}">
+      <div class="pref-q-title">${q.q}</div>
+      <div class="pref-q-opts">${q.opts.map(o=>`<div class="pref-opt" data-v="${o}">${o}</div>`).join('')}</div>
+    </div>
+  `).join('');
+  document.querySelectorAll('.pref-q').forEach(qEl => {
+    qEl.querySelectorAll('.pref-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        qEl.querySelectorAll('.pref-opt').forEach(x => x.classList.remove('on'));
+        opt.classList.add('on');
+        prefAnswers[qEl.dataset.k] = opt.dataset.v;
+        document.getElementById('count-pref').textContent = Object.keys(prefAnswers).length;
+        loverCheck();
+      });
+    });
+  });
+
+  // 灵感 chip 一键插入 wish 文本
+  const wishTextarea = document.getElementById('lover-wish');
+  document.querySelectorAll('#wish-chips .chip-insert').forEach(c => {
+    c.addEventListener('click', () => {
+      const txt = c.dataset.t;
+      const cur = wishTextarea.value.trim();
+      if (cur.includes(txt)) return;
+      wishTextarea.value = cur ? cur + ' · ' + txt : txt;
+    });
+  });
+
   function loverCheck() {
     const n = loverSelected.size;
     document.getElementById('count-lover').textContent = n;
     document.getElementById('hint-lover').textContent = n < 3 ? `还差 ${3-n} 个` : (n>=5 ? '已满' : `还可以选 ${5-n} 个`);
     const wxOk = existingWx || WX_RE.test(loverWxInput.value.trim());
-    loverSubmit.disabled = !(n>=3 && n<=5 && wxOk);
+    const prefsOk = Object.keys(prefAnswers).length === 6;
+    loverSubmit.disabled = !(n>=3 && n<=5 && prefsOk && wxOk);
   }
   document.querySelectorAll('#tags-lover .tag').forEach(t => {
     t.addEventListener('click', () => {
@@ -744,7 +883,25 @@
     });
   });
   loverWxInput.addEventListener('input', loverCheck);
-  loverSubmit.addEventListener('click', () => { if (!loverSubmit.disabled) { if (!existingWx) localStorage.setItem('matchai_wechat', loverWxInput.value.trim()); triggerMatch('lover'); } });
+  loverSubmit.addEventListener('click', () => {
+    if (loverSubmit.disabled) return;
+    if (!existingWx) localStorage.setItem('matchai_wechat', loverWxInput.value.trim());
+    localStorage.setItem('matchai_lover_prefs', JSON.stringify(prefAnswers));
+    // 伴侣不直接进 B "loading", 而是进等待中（cycle wait）
+    sessionStorage.setItem('matchai_lover_demo', 'B');
+    showSceneState('lover');
+    document.getElementById('scroll').scrollTop = 0;
+  });
+
+  // 伴侣"调整资料"按钮：回到 A 状态
+  ['lover-edit', 'lover-edit-2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', () => {
+      sessionStorage.setItem('matchai_lover_demo', 'A');
+      showSceneState('lover');
+      document.getElementById('scroll').scrollTop = 0;
+    });
+  });
 
   // ---------- JOB: form ----------
   const grades = ['大一','大二','大三','大四','研一','研二','研三','已毕业'];
