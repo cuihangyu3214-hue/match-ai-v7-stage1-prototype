@@ -566,6 +566,10 @@
           <textarea class="wx-input" id="barter-desc" maxlength="30" placeholder="说明闲置物品 · 30 字"></textarea>
         </div>
         <div class="wx-block">
+          <div class="wx-label">想换什么</div>
+          <input class="wx-input" id="barter-want" type="text" placeholder="例：泡泡玛特盲盒"/>
+        </div>
+        <div class="wx-block">
           <div class="wx-label">闲置照片</div>
           <div class="photo-up">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
@@ -834,14 +838,15 @@
   if (existingWx) document.querySelector('.barter-wx').style.display = 'none';
   function barterCheck() {
     const desc = document.getElementById('barter-desc').value.trim();
+    const want = document.getElementById('barter-want').value.trim();
     const wxOk = existingWx || WX_RE.test(barterWxInput.value.trim());
-    barterSubmit.disabled = !(barterState.cat && desc && wxOk);
+    barterSubmit.disabled = !(barterState.cat && desc && want && wxOk);
   }
   document.querySelectorAll('#barter-cat .radio').forEach(r => r.addEventListener('click', () => {
     document.querySelectorAll('#barter-cat .radio').forEach(x => x.classList.remove('on'));
     r.classList.add('on'); barterState.cat = r.dataset.v; barterCheck();
   }));
-  ['barter-desc'].forEach(id => document.getElementById(id).addEventListener('input', barterCheck));
+  ['barter-desc','barter-want'].forEach(id => document.getElementById(id).addEventListener('input', barterCheck));
   barterWxInput.addEventListener('input', barterCheck);
   barterSubmit.addEventListener('click', () => { if (!barterSubmit.disabled) { if (!existingWx) localStorage.setItem('matchai_wechat', barterWxInput.value.trim()); triggerMatch('barter'); } });
 
