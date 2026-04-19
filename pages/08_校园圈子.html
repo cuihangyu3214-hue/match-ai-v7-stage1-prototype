@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-accent="indigo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Match AI · 校园圈子</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Fraunces:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../theme.css">
+<style>
+  .page { display: flex; flex-direction: column; }
+
+  .brandbar {
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 22px 10px;
+  }
+  .brand-name {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--fg);
+  }
+  .brand-name .dot { color: var(--accent); }
+  .school-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 10px; border-radius: var(--r-pill);
+    background: var(--accent-soft); color: var(--accent);
+    font-size: 12px; font-weight: 600;
+  }
+  .school-chip svg { width: 12px; height: 12px; }
+
+  /* === Auth state === */
+  .auth-state {
+    flex: 1; min-height: 0;
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+    padding: 24px;
+    scrollbar-width: none;
+  }
+  .auth-state::-webkit-scrollbar { display: none; }
+  .auth-icon {
+    width: 80px; height: 80px;
+    border-radius: 24px;
+    background: var(--accent-soft);
+    display: flex; align-items: center; justify-content: center;
+    margin: 40px auto 18px;
+  }
+  .auth-icon svg { width: 36px; height: 36px; color: var(--accent); }
+  .auth-title {
+    text-align: center;
+    font-size: 22px; font-weight: 700; letter-spacing: -0.02em;
+    color: var(--fg); margin-bottom: 6px;
+  }
+  .auth-sub {
+    text-align: center;
+    font-size: 13px; color: var(--fg-mute); line-height: 1.6;
+    max-width: 280px; margin: 0 auto 28px;
+  }
+  .auth-form { display: flex; flex-direction: column; gap: 14px; }
+  .field-label { font-size: 12px; font-weight: 600; color: var(--fg); margin-bottom: 6px; }
+  .field-input {
+    width: 100%; padding: 12px 14px;
+    background: var(--bg-elev); border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-family: inherit; font-size: 15px; color: var(--fg);
+    transition: border-color var(--d-1) var(--ease);
+  }
+  .field-input:focus { outline: none; border-color: var(--accent); }
+  .photo-up {
+    display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px;
+    width: 100%; padding: 26px 0;
+    border: 1.5px dashed var(--accent);
+    border-radius: 14px;
+    background: var(--accent-soft);
+    color: var(--accent); font-size: 12px; font-weight: 600;
+    cursor: pointer; user-select: none;
+    transition: all var(--d-1) var(--ease);
+  }
+  .photo-up:hover { background: var(--accent); color: white; }
+  .photo-up svg { width: 22px; height: 22px; }
+  .photo-up .pri { font-weight: 600; }
+  .photo-up .sub { font-size: 11px; opacity: 0.7; font-weight: 500; }
+
+  .auth-foot {
+    margin-top: auto; padding-top: 24px;
+  }
+
+  /* === Tab strip (复用首页样式) === */
+  .tab-strip {
+    flex-shrink: 0;
+    display: flex; gap: 0;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tab-strip::-webkit-scrollbar { display: none; }
+  .tchip {
+    flex-shrink: 0;
+    padding: 12px 12px 14px;
+    margin-right: 2px;
+    color: var(--fg-mute);
+    cursor: pointer; position: relative; user-select: none;
+    transition: color var(--d-1) var(--ease);
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    min-width: 60px;
+  }
+  .tchip-emoji { font-size: 18px; line-height: 1; }
+  .tchip-name { font-size: 12px; font-weight: 500; line-height: 1.2; white-space: nowrap; }
+  .tchip-status {
+    font-size: 9px; line-height: 1; color: var(--fg-faint);
+    margin-top: 1px; letter-spacing: -0.01em;
+  }
+  .tchip:hover .tchip-name { color: var(--fg); }
+  .tchip.on .tchip-name { color: var(--accent); font-weight: 600; }
+  .tchip.on::after {
+    content: ''; position: absolute;
+    left: 12px; right: 12px; bottom: -1px; height: 2px;
+    background: var(--accent); border-radius: 1px;
+  }
+  .tchip.has-new .tchip-status { color: var(--accent); font-weight: 600; }
+
+  .scroll {
+    flex: 1; min-height: 0;
+    overflow-y: auto;
+    padding: 18px 22px 22px;
+    scrollbar-width: none;
+  }
+  .scroll::-webkit-scrollbar { display: none; }
+
+  .pane { display: none; }
+  .pane.show { display: block; animation: fadeIn 240ms var(--ease); }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(4px);} to { opacity:1; transform:translateY(0);} }
+
+  /* === Result === */
+  .res-h {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .res-h h2 { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; color: var(--fg); }
+  .res-h .small { font-size: 12px; color: var(--fg-mute); }
+
+  .card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all var(--d-1) var(--ease);
+    box-shadow: var(--shadow-card);
+  }
+  .card:hover { transform: translateY(-2px); }
+  .card-top { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+  .ava {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 16px; font-weight: 600; flex-shrink: 0;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+  }
+  .nm { flex: 1; min-width: 0; }
+  .nm-line { display: flex; align-items: center; gap: 10px; }
+  .nm-name { font-size: 15px; font-weight: 600; color: var(--fg); }
+  .nm-meta { font-size: 12px; color: var(--fg-mute); margin-top: 2px; }
+
+  .quote {
+    font-family: 'Fraunces', Georgia, serif;
+    font-style: italic; font-size: 13.5px;
+    color: var(--fg); line-height: 1.5;
+    padding: 6px 0 6px 12px;
+    border-left: 2px solid var(--accent);
+    margin-bottom: 10px;
+  }
+  .quote-from {
+    display: block;
+    font-family: var(--font-sans); font-style: normal;
+    font-size: 11px; color: var(--accent); font-weight: 600;
+    margin-top: 4px; letter-spacing: 0.04em;
+  }
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill {
+    font-size: 11px; padding: 3px 9px;
+    background: var(--accent-soft); color: var(--accent);
+    border-radius: var(--r-pill); font-weight: 500;
+  }
+
+  /* === Bottom tab === */
+  .bottom-tab {
+    flex-shrink: 0;
+    display: flex; align-items: stretch;
+    background: var(--bg-elev); border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .btab {
+    flex: 1; padding: 10px 0 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    color: var(--fg-faint); cursor: pointer;
+    transition: color var(--d-1) var(--ease);
+  }
+  .btab:hover, .btab.active { color: var(--accent); }
+  .btab svg { width: 22px; height: 22px; stroke-width: 2; }
+  .btab span { font-size: 10px; font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="statusbar">
+    <span>9:41</span>
+    <span class="icons">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6c5-3 15-3 20 0"/><path d="M5 10c4-2 10-2 14 0"/><path d="M8 14c2-1 6-1 8 0"/><circle cx="12" cy="18" r="1.2" fill="currentColor"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="18" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg>
+    </span>
+  </div>
+
+  <div class="brandbar">
+    <span class="brand-name">校园圈子</span>
+    <span class="school-chip" id="school-tag" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg>
+      <span id="school-name">浙江大学</span>
+    </span>
+  </div>
+
+  <!-- 状态 A: 未认证 -->
+  <div class="auth-state" id="auth-pane">
+    <div class="auth-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg>
+    </div>
+    <div class="auth-title">先认证你的学校</div>
+    <div class="auth-sub">校园圈子里只有同校的人。<br>认证一次，全部场景通用。</div>
+
+    <div class="auth-form">
+      <div>
+        <div class="field-label">学校</div>
+        <input class="field-input" id="auth-school" type="text" placeholder="如：浙江大学" autocomplete="off"/>
+      </div>
+      <div>
+        <div class="field-label">学生证 / 在校证明</div>
+        <div class="photo-up">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span class="pri">添加照片</span>
+          <span class="sub">学生证 / 学信网截图</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-foot">
+      <button class="btn-primary" id="auth-submit" disabled>提交认证</button>
+      <p style="text-align:center;font-size:11px;color:var(--fg-faint);margin-top:10px;">人工审核 · 通常 24h 内</p>
+    </div>
+  </div>
+
+  <!-- 状态 B: 已认证 → 顶部 chip + 内容 -->
+  <div id="circle-pane" style="display:none;flex:1;min-height:0;flex-direction:column;">
+    <div class="tab-strip" id="tabs"></div>
+    <div class="scroll" id="scroll"></div>
+  </div>
+
+  <div class="bottom-tab">
+    <div class="btab" data-nav="03_首页.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      <span>首页</span>
+    </div>
+    <div class="btab active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
+      <span>圈子</span>
+    </div>
+    <div class="btab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+      <span>我的</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ===== 校园细分场景 =====
+  const SCENES = [
+    { k: 'lib',    emoji: '📚', name: '图书馆' },
+    { k: 'study',  emoji: '✏️', name: '自习' },
+    { k: 'eat',    emoji: '🍜', name: '食堂' },
+    { k: 'gym',    emoji: '💪', name: '健身' },
+    { k: 'kao',    emoji: '🎓', name: '考研' },
+    { k: 'movie',  emoji: '🎬', name: '看电影' },
+    { k: 'game',   emoji: '🎮', name: '开黑' },
+  ];
+
+  // mock 结果（按场景）
+  const RESULTS = {
+    lib:   [{ id:'lib1', initial:'刘', name:'刘星辰', meta:'男 · 玉泉', tags:['考研','深度专注'], quote:'TA 周一-五早 8 点固定在玉泉一楼，长期搭档型。' }],
+    study: [{ id:'st1',  initial:'陈', name:'陈宁',   meta:'女 · 紫金港', tags:['每周 4 次','自律'], quote:'你们的自习时间高度重合，常去紫金港图书馆 5 楼。' }],
+    eat:   [{ id:'eat1', initial:'王', name:'王同学', meta:'男 · 玉泉', tags:['不吃辣','西餐'], quote:'你们都不吃辣，偏好西餐和清淡，可以组队点外卖。' }],
+    gym:   [{ id:'gym1', initial:'张', name:'张磊',   meta:'男 · 紫金港', tags:['撸铁','增肌'], quote:'TA 紫金港体育馆撸铁，增肌阶段，可以一起练。' },
+            { id:'gym2', initial:'王', name:'王悦',   meta:'女 · 紫金港', tags:['普拉提','瑜伽'], quote:'TA 习惯下午练普拉提，节奏温和。' }],
+    kao:   [{ id:'kao1', initial:'李', name:'李知非', meta:'男 · 西溪', tags:['考研冲刺','英语薄弱'], quote:'TA 也在准备本校研究生，英语薄弱想找互助伙伴。' }],
+    movie: [{ id:'mov1', initial:'孙', name:'孙小可', meta:'女 · 玉泉', tags:['艺术片','独立电影'], quote:'TA 喜欢艺术片，下周三新片有空一起？' }],
+    game:  [{ id:'gm1',  initial:'赵', name:'赵杰',   meta:'男 · 紫金港', tags:['LOL','黄金'], quote:'TA 黄金段位 ADC，晚上 9-11 点常开。' }],
+  };
+
+  // ===== 认证逻辑 =====
+  const authedSchool = localStorage.getItem('matchai_school');
+  if (authedSchool) {
+    showCircle();
+  } else {
+    showAuth();
+  }
+
+  function showAuth() {
+    document.getElementById('auth-pane').style.display = 'flex';
+    document.getElementById('circle-pane').style.display = 'none';
+    document.getElementById('school-tag').style.display = 'none';
+  }
+
+  function showCircle() {
+    document.getElementById('auth-pane').style.display = 'none';
+    document.getElementById('circle-pane').style.display = 'flex';
+    document.getElementById('school-tag').style.display = 'inline-flex';
+    document.getElementById('school-name').textContent = localStorage.getItem('matchai_school') || '浙江大学';
+    renderTabs();
+  }
+
+  // 认证表单
+  const authSchool = document.getElementById('auth-school');
+  const authSubmit = document.getElementById('auth-submit');
+  authSchool.addEventListener('input', () => {
+    authSubmit.disabled = !authSchool.value.trim();
+  });
+  authSubmit.addEventListener('click', () => {
+    if (authSubmit.disabled) return;
+    localStorage.setItem('matchai_school', authSchool.value.trim());
+    showCircle();
+  });
+
+  // ===== Tab + 内容 =====
+  let currentScene = SCENES[0].k;
+
+  function renderTabs() {
+    const tabsEl = document.getElementById('tabs');
+    tabsEl.innerHTML = SCENES.map((s, i) => {
+      const activated = localStorage.getItem('matchai_school_' + s.k);
+      const status = activated ? `${RESULTS[s.k]?.length || 0} 个新` : '没参加';
+      const isOn = s.k === currentScene;
+      return `
+        <div class="tchip ${isOn?'on':''} ${activated?'has-new':''}" data-k="${s.k}">
+          <span class="tchip-emoji">${s.emoji}</span>
+          <span class="tchip-name">${s.name}</span>
+          <span class="tchip-status">${status}</span>
+        </div>
+      `;
+    }).join('');
+    tabsEl.querySelectorAll('.tchip').forEach(el => {
+      el.addEventListener('click', () => {
+        currentScene = el.dataset.k;
+        renderTabs();
+        renderScene();
+      });
+    });
+    renderScene();
+  }
+
+  function renderScene() {
+    const scene = SCENES.find(s => s.k === currentScene);
+    const activated = localStorage.getItem('matchai_school_' + scene.k);
+    const list = RESULTS[scene.k] || [];
+    const scrollEl = document.getElementById('scroll');
+
+    if (!activated) {
+      // A 没参加: 一键参与
+      scrollEl.innerHTML = `
+        <div style="text-align:center;padding:60px 20px 40px;">
+          <div style="font-size:48px;margin-bottom:16px;opacity:0.85;">${scene.emoji}</div>
+          <h2 style="font-size:20px;font-weight:700;letter-spacing:-0.02em;color:var(--fg);">${scene.name}搭子</h2>
+          <p style="font-size:13px;color:var(--fg-mute);margin-top:6px;line-height:1.5;">同校 · 实时匹配 · 微信号通用</p>
+          <button class="btn-primary" id="join-btn" style="margin-top:28px;max-width:200px;">参加</button>
+        </div>
+      `;
+      document.getElementById('join-btn').addEventListener('click', () => {
+        localStorage.setItem('matchai_school_' + scene.k, '1');
+        renderTabs();
+      });
+    } else {
+      // C 有结果
+      scrollEl.innerHTML = `
+        <div class="res-h">
+          <div>
+            <h2>${scene.name}搭子</h2>
+            <span class="small">${list.length} 位 · 每天 1 次匹配</span>
+          </div>
+        </div>
+        ${list.map(m => `
+          <div class="card" data-id="${m.id}">
+            <div class="card-top">
+              <div class="ava">${m.initial}</div>
+              <div class="nm">
+                <div class="nm-line"><span class="nm-name">${m.name}</span></div>
+                <div class="nm-meta">${m.meta}</div>
+              </div>
+            </div>
+            <div class="quote">"${m.quote}"<span class="quote-from">— Aurora · 你的分身</span></div>
+            <div class="pills">${m.tags.map(t=>`<span class="pill">#${t}</span>`).join('')}</div>
+          </div>
+        `).join('')}
+        <p style="text-align:center;font-size:11px;color:var(--fg-faint);margin-top:14px;">明天还有 1 次新匹配</p>
+      `;
+      scrollEl.querySelectorAll('.card').forEach(c => {
+        c.addEventListener('click', () => goPage('07_用户详情.html?id=' + c.dataset.id));
+      });
+    }
+  }
+
+  function goPage(target) {
+    if (window.parent !== window) window.parent.postMessage({ type:'nav', page:target }, '*');
+    else location.href = target;
+  }
+
+  // 底部 tab nav
+  document.querySelectorAll('.btab[data-nav]').forEach(b => {
+    b.addEventListener('click', () => goPage(b.dataset.nav));
+  });
+
+  window.addEventListener('message', e => {
+    if (e.data?.type === 'theme') document.documentElement.dataset.theme = e.data.value;
+    if (e.data?.type === 'accent') document.documentElement.dataset.accent = e.data.value;
+  });
+</script>
+</body>
+</html>

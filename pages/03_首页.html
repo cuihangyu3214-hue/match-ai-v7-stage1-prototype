@@ -723,7 +723,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
       <span>首页</span>
     </div>
-    <div class="btab">
+    <div class="btab" data-nav="08_校园圈子.html">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
       <span>圈子</span>
     </div>
@@ -1108,6 +1108,11 @@
   // ---------- INIT ----------
   SCENES.forEach(s => showSceneState(s));
   document.getElementById('city').textContent = localStorage.getItem('matchai_city') || '杭州';
+
+  // ---------- Bottom tab nav ----------
+  document.querySelectorAll('.btab[data-nav]').forEach(b => {
+    b.addEventListener('click', () => goPage(b.dataset.nav));
+  });
 
   // ---------- Demo cycler (acts on currentScene) ----------
   const demoBtn = document.createElement('button');
