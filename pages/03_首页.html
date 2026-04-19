@@ -31,34 +31,44 @@
 
   .tab-strip {
     flex-shrink: 0;
-    display: flex; gap: 0;
-    padding: 0 16px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
     border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
   }
-  .tab-strip::-webkit-scrollbar { display: none; }
   .tchip {
-    flex-shrink: 0;
-    padding: 12px 12px 14px;
-    margin-right: 4px;
-    font-size: 14px; font-weight: 500;
+    padding: 9px 4px 11px;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
     color: var(--fg-mute);
     cursor: pointer; position: relative; user-select: none;
     transition: color var(--d-1) var(--ease);
-    scroll-snap-align: start;
-    white-space: nowrap;
   }
-  .tchip:hover { color: var(--fg); }
-  .tchip.on { color: var(--accent); font-weight: 600; }
+  .tchip-emoji {
+    font-size: 19px; line-height: 1; position: relative;
+    transition: transform var(--d-1) var(--ease);
+  }
+  .tchip:hover .tchip-emoji { transform: scale(1.1); }
+  .tchip-name { font-size: 12px; font-weight: 500; line-height: 1.2; }
+  .tchip-status {
+    font-size: 9px; line-height: 1; color: var(--fg-faint);
+    margin-top: 1px;
+    letter-spacing: -0.01em;
+  }
+  .tchip:hover .tchip-name { color: var(--fg); }
+  .tchip.on .tchip-name { color: var(--accent); font-weight: 600; }
   .tchip.on::after {
     content: ''; position: absolute;
     left: 12px; right: 12px; bottom: -1px; height: 2px;
     background: var(--accent); border-radius: 1px;
   }
-  .tchip.lock { color: var(--fg-faint); }
+  .tchip.lock { opacity: 0.5; }
+  .tchip.has-new .tchip-status { color: var(--accent); font-weight: 600; }
+  .tchip.has-new .tchip-emoji::after {
+    content: ''; position: absolute;
+    top: -2px; right: -6px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+  }
 
   .scroll {
     flex: 1; min-height: 0;
@@ -184,6 +194,65 @@
     text-align: center; padding: 80px 20px; color: var(--fg-faint);
   }
   .empty .e-emoji { font-size: 36px; margin-bottom: 12px; opacity: 0.5; }
+
+  /* State B: 匹配中 */
+  .matching {
+    text-align: center;
+    padding: 60px 20px 40px;
+  }
+  .matching-orb {
+    width: 80px; height: 80px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 40%, var(--accent), var(--accent-hover));
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+    box-shadow: 0 0 40px var(--accent-soft), inset 0 1px 0 rgba(255,255,255,0.3);
+    animation: pulse 2s var(--ease) infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 40px var(--accent-soft), inset 0 1px 0 rgba(255,255,255,0.3); }
+    50% { transform: scale(1.06); box-shadow: 0 0 60px var(--accent-soft), 0 0 100px var(--accent-soft), inset 0 1px 0 rgba(255,255,255,0.3); }
+  }
+  .orb-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: white;
+    animation: dotbounce 1.4s ease-in-out infinite;
+  }
+  .orb-dot:nth-child(2) { animation-delay: 0.2s; }
+  .orb-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dotbounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+  .matching-title { font-size: 17px; font-weight: 600; color: var(--fg); letter-spacing: -0.01em; }
+  .matching-sub { font-size: 13px; color: var(--fg-mute); margin-top: 6px; line-height: 1.5; }
+  .matching-bar {
+    width: 200px; height: 3px; margin: 24px auto 0;
+    background: var(--border); border-radius: 2px; overflow: hidden;
+  }
+  .matching-bar-fill {
+    height: 100%; width: 30%;
+    background: var(--accent); border-radius: 2px;
+    animation: barProgress 2s ease-in-out infinite;
+  }
+  @keyframes barProgress {
+    0% { width: 10%; transform: translateX(0); }
+    50% { width: 60%; }
+    100% { width: 90%; transform: translateX(110%); }
+  }
+
+  /* Demo state cycler (top-right floating) */
+  .demo-toggle {
+    position: absolute;
+    top: 50px; right: 12px;
+    background: var(--fg); color: var(--bg-app);
+    font-size: 10px; font-weight: 600;
+    padding: 5px 8px; border-radius: var(--r-pill);
+    cursor: pointer; opacity: 0.5;
+    z-index: 100;
+    border: none;
+    transition: opacity var(--d-1) var(--ease);
+  }
+  .demo-toggle:hover { opacity: 1; }
   .empty .e-title { font-size: 14px; font-weight: 600; color: var(--fg-mute); margin-bottom: 4px; }
   .empty .e-sub { font-size: 12px; color: var(--fg-faint); line-height: 1.5; }
 
@@ -223,11 +292,31 @@
   </div>
 
   <div class="tab-strip" id="tabs">
-    <div class="tchip on" data-s="buddy">合拍搭子</div>
-    <div class="tchip lock" data-s="lover">合拍伴侣</div>
-    <div class="tchip lock" data-s="job">实习求职</div>
-    <div class="tchip lock" data-s="skill">技能交换</div>
-    <div class="tchip lock" data-s="barter">易物</div>
+    <div class="tchip on" data-s="buddy">
+      <span class="tchip-emoji">🤝</span>
+      <span class="tchip-name">搭子</span>
+      <span class="tchip-status" id="st-buddy">没参加</span>
+    </div>
+    <div class="tchip lock" data-s="lover">
+      <span class="tchip-emoji">💕</span>
+      <span class="tchip-name">伴侣</span>
+      <span class="tchip-status">暂未开放</span>
+    </div>
+    <div class="tchip lock" data-s="job">
+      <span class="tchip-emoji">💼</span>
+      <span class="tchip-name">求职</span>
+      <span class="tchip-status">暂未开放</span>
+    </div>
+    <div class="tchip lock" data-s="skill">
+      <span class="tchip-emoji">🔁</span>
+      <span class="tchip-name">技能</span>
+      <span class="tchip-status">暂未开放</span>
+    </div>
+    <div class="tchip lock" data-s="barter">
+      <span class="tchip-emoji">🔄</span>
+      <span class="tchip-name">易物</span>
+      <span class="tchip-status">暂未开放</span>
+    </div>
   </div>
 
   <div class="scroll" id="scroll">
@@ -255,6 +344,21 @@
         </div>
       </div>
 
+      <!-- State B: 匹配中 -->
+      <div class="state" id="buddy-B">
+        <div class="matching">
+          <div class="matching-orb">
+            <div class="orb-dot"></div>
+            <div class="orb-dot"></div>
+            <div class="orb-dot"></div>
+          </div>
+          <h2 class="matching-title">分身正在为你寻找…</h2>
+          <p class="matching-sub">扫描了 38 个潜在合拍的人<br>预计 15 秒内出结果</p>
+          <div class="matching-bar"><div class="matching-bar-fill"></div></div>
+        </div>
+      </div>
+
+      <!-- State C: 有结果 -->
       <div class="state" id="buddy-C">
         <div class="res-h">
           <h2>今日匹配</h2>
@@ -342,10 +446,30 @@
   });
 
   function showBuddyState() {
-    const activated = localStorage.getItem('matchai_buddy_activated');
-    document.getElementById('buddy-A').classList.toggle('show', !activated);
-    document.getElementById('buddy-C').classList.toggle('show', !!activated);
-    if (activated) renderCards();
+    // demo mode: ?demo=A|B|C  覆盖 localStorage
+    const url = new URL(location.href);
+    const demo = url.searchParams.get('demo');
+    let state;
+    if (demo === 'A' || demo === 'B' || demo === 'C') state = demo;
+    else if (sessionStorage.getItem('matchai_buddy_demo')) state = sessionStorage.getItem('matchai_buddy_demo');
+    else state = localStorage.getItem('matchai_buddy_activated') ? 'C' : 'A';
+
+    document.getElementById('buddy-A').classList.toggle('show', state === 'A');
+    document.getElementById('buddy-B').classList.toggle('show', state === 'B');
+    document.getElementById('buddy-C').classList.toggle('show', state === 'C');
+
+    // 更新 tab 状态文字
+    const st = document.getElementById('st-buddy');
+    const chip = document.querySelector('.tchip[data-s="buddy"]');
+    chip.classList.remove('has-new');
+    if (state === 'A') st.textContent = '没参加';
+    if (state === 'B') st.textContent = '匹配中';
+    if (state === 'C') {
+      st.textContent = '3 个新';
+      chip.classList.add('has-new');
+    }
+
+    if (state === 'C') renderCards();
   }
 
   const categories = [
@@ -399,9 +523,16 @@
     if (submit.disabled) return;
     if (!existingWx) localStorage.setItem('matchai_wechat', wxInput.value.trim());
     localStorage.setItem('matchai_buddy_tags', JSON.stringify([...selected]));
-    localStorage.setItem('matchai_buddy_activated', '1');
+    // 进入匹配中状态
+    sessionStorage.setItem('matchai_buddy_demo', 'B');
     showBuddyState();
     document.getElementById('scroll').scrollTop = 0;
+    // 3 秒后进入结果
+    setTimeout(() => {
+      localStorage.setItem('matchai_buddy_activated', '1');
+      sessionStorage.removeItem('matchai_buddy_demo');
+      showBuddyState();
+    }, 3000);
   });
 
   const matches = [
@@ -436,6 +567,27 @@
 
   showBuddyState();
   document.getElementById('city').textContent = localStorage.getItem('matchai_city') || '杭州';
+
+  // Demo 状态切换器（演示用，挂在右上角）
+  const demoBtn = document.createElement('button');
+  demoBtn.className = 'demo-toggle';
+  demoBtn.textContent = '演示·切状态';
+  demoBtn.onclick = () => {
+    const cur = sessionStorage.getItem('matchai_buddy_demo') ||
+                (localStorage.getItem('matchai_buddy_activated') ? 'C' : 'A');
+    const next = cur === 'A' ? 'B' : (cur === 'B' ? 'C' : 'A');
+    if (next === 'A') {
+      localStorage.removeItem('matchai_buddy_activated');
+      sessionStorage.removeItem('matchai_buddy_demo');
+    } else if (next === 'B') {
+      sessionStorage.setItem('matchai_buddy_demo', 'B');
+    } else {
+      localStorage.setItem('matchai_buddy_activated', '1');
+      sessionStorage.removeItem('matchai_buddy_demo');
+    }
+    showBuddyState();
+  };
+  document.querySelector('.page').appendChild(demoBtn);
 
   window.addEventListener('message', e => {
     if (e.data?.type === 'theme') document.documentElement.dataset.theme = e.data.value;
